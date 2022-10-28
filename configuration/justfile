@@ -1,0 +1,15 @@
+
+default:
+
+# Installs all dependency
+install:
+  ansible-galaxy role install -r requirements.yml --ignore-errors
+# Launches an editor to manage secrets
+edit-secrets:
+  ansible-vault edit --vault-id casita.encrypted vars.secret.enc.yml
+
+# Shows all secrets
+show-secrets secret="":
+  ansible-vault view --vault-id casita.encrypted vars.secret.enc.yml {{ if secret != "" { "| gojq --yaml-input .secret." + secret} else { "" } }}
+config tags="":
+  ansible-playbook config.yml -e @vars.secret.enc.yml --vault-id casita.encrypted -e @vars.yml {{ if tags != "" { "--tags " + tags } else { "" } }}

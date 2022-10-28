@@ -1,0 +1,222 @@
+- hosts: cerebrito
+  become: true
+  tasks:
+    - name: Allow all sudo users without password
+      ansible.builtin.template:
+        dest: /etc/sudoers.d
+        src: files/cerebrito/001-nopass
+        validate: 'visudo -cf %s'
+    - name: Create configuration directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "u=rwx,g=rwx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "/opt/cerebrito"
+        - "/opt/cerebrito/config"
+    - name: Install some basic packages
+      package:
+        state: present
+        name: "{{ item }}"
+      tags:
+        - basic-packages
+      with_items:
+        - htop
+        - tree
+        - vim
+        - iotop
+- hosts: cerebrito
+  vars:
+    pip_install_packages:
+      - name: docker
+      - name: docker-compose
+  become: true
+  tags:
+    - docker
+  roles:
+    - geerlingguy.pip
+    - geerlingguy.docker
+- hosts: cerebrito
+  become: true
+  tags:
+    - tailscale
+  roles:
+    - artis3n.tailscale
+- hosts: cerebrito
+  become: true
+  tags:
+    - network
+  tasks:
+    - name: Copy netplan configuration files.
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "/etc/netplan/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/cerebrito/netplan/*"
+- hosts: cerebrito
+  tags:
+    - mqtt
+    - services
+  tasks:
+    - name: Create configuration directories for mqtt
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/mqtt"
+    - name: Copy configuration files
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/mqtt/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/mqtt/*"
+      register: mqtt_config
+    - name: Create configuration directories for mqtt
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/mqtt/data"
+        - "{{ base_directory }}/mqtt/log"
+
+- hosts: cerebrito
+  tags:
+    - homeassistant
+    - services
+  tasks:
+    - name: Create configuration directories for homeassistant
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/homeassistant"
+    - name: Copy configuration files
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/homeassistant/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/homeassistant/*"
+    - name: Copy configuration files for homeassistant
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/homeassistant"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/homeassistant/*"
+      register: "ha_config"
+
+
+- hosts: cerebrito
+  tags:
+    - nodered
+    - services
+  tasks:
+    - name: Create configuration directories for nodered
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/nodered"
+- hosts: cerebrito
+  tags:
+    - pihole
+    - services
+  tasks:
+    - name: Create configuration directories for pihole
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/pihole"
+        - "{{ base_directory }}/pihole/etc"
+        - "{{ base_directory }}/pihole/dnsmasq.d"
+    - name: Create dnsmasq configuration for wildcard
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/pihole/dnsmasq.d/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      loop: "{{ lookup('ansible.builtin.fileglob', 'files/pihole/dnsmasq.d/*', wantlist=True )}}"
+- hosts: cerebrito
+  tags:
+    - ssl
+    - traefik
+  tasks:
+    - name: Create directories for certificates
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/certs"
+    - name: Copy certificates to directories
+      ansible.builtin.copy:
+        dest: "{{ base_directory }}/certs/{{ item.key }}"
+        content: "{{ item.value }}"
+        mode: "u=rwx,g=,o="
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      loop: "{{ lookup('ansible.builtin.dict', ssl_config) }}"
+      register: changed_certs
+      no_log: true
+    - name: Copy traefik configuration to remote
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory}}"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      loop: "{{ lookup('ansible.builtin.fileglob', 'files/traefik*', wantlist=True )}}"
+- hosts: cerebrito
+  tags:
+    - docker-compose
+    - services
+  tasks:
+    - name: Copy docker-compose file file
+      ansible.builtin.template:
+        src: files/docker-compose.yml
+        dest: "{{ base_directory}}"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      register: docker_compose
+    - name: Check to see if we want to restart the services
+      ansible.builtin.set_fact:
+        restart: "{{ docker_compose.changed or (ha_config is defined and ha_config.changed) or (mqtt_config is defined and mqtt_config.changed) }}"
+    - name: Fire up docker-compose.yml
+      community.docker.docker_compose:
+        project_src: "{{ base_directory }}"
+        pull: true
+        restarted: "{{ restart }}"
+        state: "present"

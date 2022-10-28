@@ -1,0 +1,4 @@
+server_user: "xocas__"
+docker_users:
+  - "{{ server_user }}"
+base_directory: "/opt/cerebrito/"

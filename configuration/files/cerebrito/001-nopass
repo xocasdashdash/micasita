@@ -1,0 +1,2 @@
+# Allow users to become sudo without password
+%sudo ALL=(ALL) NOPASSWD: ALL

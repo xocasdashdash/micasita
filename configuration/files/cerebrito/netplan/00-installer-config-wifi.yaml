@@ -1,0 +1,9 @@
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  wifis:
+    wlp1s0:
+      access-points:
+        {{ wifi_name }}:
+          password: {{ wifi_password }}
+      dhcp4: true

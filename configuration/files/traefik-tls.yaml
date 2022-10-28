@@ -1,0 +1,9 @@
+tls:
+  certificates:
+    - certFile: /certs/familiafg.es.certificate.pem
+      keyFile: /certs/familiafg.es.private.pem
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/familiafg.es.certificate.pem
+        keyFile: /certs/familiafg.es.private.pem

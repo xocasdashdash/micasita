@@ -1,0 +1,19 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+sensor:
+  - platform: mqtt_room
+    device_id: "iBeacon:c737f23e-5c40-437e-b783-4e7ca40ad2e7_100_1"
+    name: "Joaquin - Phone"
+    timeout: 5
+    away_timeout: 15
+    state_topic: "espresense/rooms"
