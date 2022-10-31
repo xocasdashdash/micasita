@@ -58,6 +58,15 @@
         mode: "u=rw,g=r,o=r"
       with_fileglob:
         - "files/cerebrito/netplan/*"
+    - name: Copy eth0 link file
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "/etc/systemd/network/"
+        owner: "root"
+        group: "root"
+        mode: "u=rw,g=r,o=r"
+      loop:
+        - "files/cerebrito/10-eth0.link"
 - hosts: cerebrito
   tags:
     - mqtt

@@ -1,0 +1,5 @@
+[Match]
+MacAddress={{ eth0_mac_address }}
+[Link]
+Description=Fake interface for pihole
+Name=eth0
