@@ -96,6 +96,7 @@
 - hosts: cerebrito
   tags:
     - homeassistant
+    - hass
     - services
   tasks:
     - name: Create configuration directories for homeassistant
@@ -106,20 +107,11 @@
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
-        - "{{ base_directory }}/homeassistant"
-    - name: Copy configuration files
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: "{{ base_directory }}/homeassistant/"
-        owner: "{{ server_user }}"
-        group: "{{ server_user }}"
-        mode: "u=rw,g=r,o=r"
-      with_fileglob:
-        - "files/homeassistant/*"
+        - "{{ base_directory }}/homeassistant/config"
     - name: Copy configuration files for homeassistant
       ansible.builtin.template:
         src: "{{ item }}"
-        dest: "{{ base_directory }}/homeassistant"
+        dest: "{{ base_directory }}/homeassistant/config"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
         mode: "u=rw,g=r,o=r"
@@ -170,8 +162,9 @@
   tags:
     - ssl
     - traefik
+    - services
   tasks:
-    - name: Create directories for certificates
+    - name: Create directories for traefik
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
@@ -180,6 +173,7 @@
         group: "{{ server_user }}"
       with_items:
         - "{{ base_directory }}/certs"
+        - "{{ base_directory }}/traefik/logs"
     - name: Copy certificates to directories
       ansible.builtin.copy:
         dest: "{{ base_directory }}/certs/{{ item.key }}"

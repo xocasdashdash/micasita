@@ -6,8 +6,10 @@ global:
 
 # log default is ERROR, but WARN is more helpful
 log:
-  level: INFO
+  level: WARN
   # level: INFO
+accessLog:
+  filePath: "/logs/access.log"
 
 # enable dashboard on 8080 with auth
 api:

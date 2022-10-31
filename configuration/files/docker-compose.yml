@@ -34,16 +34,28 @@ services:
       - "{{ base_directory }}/certs/:/certs/:ro"
       - "{{ base_directory }}/traefik.yaml:/etc/traefik/traefik.yaml:ro"
       - "{{ base_directory }}/traefik-tls.yaml:/configuration/traefik-tls.yaml:ro"
+      - "{{ base_directory }}/traefik/logs:/logs"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command:
       #- "--log.level=DEBUG"
       - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:7080
+      - --entrypoints.web.address=:80
       - --entrypoints.web-secure.address=:443
       - --providers.file.directory=/configuration/
       - --providers.file.watch=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.familiafg.es`)"
+      - "traefik.http.routers.dashboard.middlewares=redirect-to-dashboard"
+      - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
+      - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.replacement=https://$$1/dashboard/"
+      - "traefik.http.routers.dashboard.service=dashboard"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
     healthcheck:
       test:
         - CMD
@@ -53,9 +65,11 @@ services:
       timeout: 5s
       retries: 3
     ports:
-      - "7080:7080"
+      - "80:80"
       - "443:443"
-      - "8081:8080"
+      - "1883:1883"
+      - "53:53/tcp"
+      - "53:53/udp"
   whoami:
     networks: [main]
     image: "traefik/whoami"
@@ -85,6 +99,7 @@ services:
       - "{{ base_directory }}/mqtt/log:/vernemq/log"
       - "{{ base_directory }}/mqtt/vmq.acl:/vernemq/etc/vmq.acl"
     labels:
+      - "traefik.enable=true"
       ## TCP Routers/Service
       - "traefik.tcp.routers.mqtt-tcp.entrypoints=mqtt"
       - "traefik.tcp.routers.mqtt-tcp.rule=HostSNI(`*`)"
@@ -117,8 +132,8 @@ services:
     networks: [main]
     ports:
       - '8053:80/tcp'
-      - '53:53/tcp'
-      - '53:53/udp'
+      - '8853:53/tcp'
+      - '8853:53/udp'
       #- "67:67/udp"
     environment:
       TZ: 'Europe/Madrid'
@@ -145,9 +160,9 @@ services:
       - "traefik.tcp.services.pihole-dns-tcp.loadbalancer.server.port=53"
 
       ## TCP Routers/Service
-      - "traefik.tcp.routers.pihole-dns-udp.entrypoints=dns-udp"
-      - "traefik.tcp.routers.pihole-dns-udp.service=pihole-dns-udp"
-      - "traefik.tcp.services.pihole-dns-udp.loadbalancer.server.port=53"
+      - "traefik.udp.routers.pihole-dns-udp.entrypoints=dns-udp"
+      - "traefik.udp.routers.pihole-dns-udp.service=pihole-dns-udp"
+      - "traefik.udp.services.pihole-dns-udp.loadbalancer.server.port=53"
 
   # mqtt:
     # networks: [zwave, zigbee, main]
