@@ -70,6 +70,23 @@ services:
       - "1883:1883"
       - "53:53/tcp"
       - "53:53/udp"
+  transmission:
+    networks: [main]
+    image: "linuxserver/transmission:latest"
+    container_name: "transmission"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.rule=Host(`transmission.familiafg.es`)"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.service=transmission"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
+    ports:
+      - 51414:51414 # Torrent port (TCP)
+      - 51414:51414/udp # Torrent port (UDP)
+    volumes:
+      - "{{ base_directory }}/transmission:/config" # Change this to your docker config folder
+      - "{{ base_directory }}/downloads:/download"
   whoami:
     networks: [main]
     image: "traefik/whoami"

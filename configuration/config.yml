@@ -104,6 +104,34 @@
 
 - hosts: cerebrito
   tags:
+    - transmission
+    - services
+  become: true
+  tasks:
+    - name: Create configuration directories for transmissions
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rwx,o=rwx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/transmission"
+        - "{{ base_directory }}/transmission/downloads"
+        - "{{ base_directory }}/transmission/downloads-temp"
+    - name: Copy configuration files for transmission
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/transmission"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/transmission/*"
+      register: "transmission_config"
+
+- hosts: cerebrito
+  tags:
     - homeassistant
     - hass
     - services
