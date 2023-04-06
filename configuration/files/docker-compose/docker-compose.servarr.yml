@@ -1,0 +1,75 @@
+version: "3.8"
+services:
+  flaresolverr:
+    networks: [main]
+    image: "ghcr.io/flaresolverr/flaresolverr:latest"
+    container_name: "flaresolverr"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+      - LOG_LEVEL=info
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.{{ public_domain }}`)"
+      - "traefik.http.routers.flaresolverr.entrypoints=websecure"
+      - "traefik.http.routers.flaresolverr.tls=true"
+      - "traefik.http.routers.flaresolverr.service=flaresolverr"
+      - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
+  transmission:
+    networks: [main]
+    image: "lscr.io/linuxserver/transmission:latest"
+    container_name: "transmission"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.rule=Host(`transmission.{{ public_domain }}`)"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.service=transmission"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
+    ports:
+      - 51414:51414 # Torrent port (TCP)
+      - 51414:51414/udp # Torrent port (UDP)
+    volumes:
+      - "{{ base_directory }}/transmission:/config" # Change this to your docker config folder
+      - "/data:/data"
+{% for config in servarr_config %}
+  {{ config.name }}:
+    networks: 
+      - main
+{% for network in config.networks |default([]) %}
+      - {{ network }}
+{% endfor %}
+    image: lscr.io/linuxserver/{{ config.name }}:{{ config.imageTag | default ("latest") }}
+    container_name: {{ config.name }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.{{ config.name }}.rule=Host(`{{ config.name }}.{{ public_domain }}`)"
+      - "traefik.http.routers.{{ config.name }}.entrypoints=websecure"
+      - "traefik.http.routers.{{ config.name }}.tls=true"
+      - "traefik.http.routers.{{ config.name }}.service={{ config.name }}"
+      - "traefik.http.services.{{ config.name }}.loadbalancer.server.port={{ config.port }}"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+    volumes:
+      - "{{ base_directory }}/arr/{{ config.name }}:/config"
+      - "/data:/data"
+{% for vol in config.extraVolumes|default([]) %}
+      - "{{ vol }}"
+{% endfor %}
+    restart: unless-stopped
+{% endfor %}
+
+networks:
+  main:
+    external:
+      name: main
+  wgnet:
+    external:
+      name: wgnet

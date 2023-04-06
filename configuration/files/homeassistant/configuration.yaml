@@ -21,5 +21,9 @@ sensor:
 http:
   use_x_forwarded_for: true
   trusted_proxies:
-    - 192.168.0.0/24 # Add the IP address of the proxy server
-    - 172.100.0.0/16 # You may also provide the subnet mask
+    # intenal subnets
+    - 192.168.0.0/24
+    - 192.168.50.0/24
+    - 192.168.1.0/24
+    # docker subnet
+    - 172.200.0.0/16

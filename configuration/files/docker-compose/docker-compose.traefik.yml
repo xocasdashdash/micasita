@@ -1,0 +1,96 @@
+version: "3.8"
+services:
+  whoami:
+    networks: [main]
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.{{ public_domain }}`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+  traefik:
+    networks: [main]
+    image: docker.io/traefik:latest@sha256:4ebf68cdb32ce65e8786ac83ece782ec0dbe583471c04dfd0af43f245b96c88f
+    restart: unless-stopped
+    volumes:
+      - "{{ base_directory }}/traefik/certs/:/certs/:ro"
+      - "{{ base_directory }}/traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro"
+      - "{{ base_directory }}/traefik/traefik-tls.yaml:/configuration/traefik-tls.yaml:ro"
+      - "{{ base_directory }}/traefik/logs:/logs"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    command:
+      #- "--log.level=DEBUG"
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secure.address=:443
+      - --providers.file.directory=/configuration/
+      - --providers.file.watch=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ public_domain }}`)"
+      - "traefik.http.routers.dashboard.middlewares=redirect-to-dashboard"
+      - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
+      - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.replacement=https://$$1/dashboard/"
+      - "traefik.http.routers.dashboard.service=dashboard"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+    healthcheck:
+      test:
+        - CMD
+        - traefik
+        - healthcheck
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - "80:80"
+      - "443:443"
+      - "1883:1883"
+      - "53:53/tcp"
+      - "53:53/udp"
+  # mqtt:
+    # networks: [zwave, zigbee, main]
+    # image: docker.io/library/eclipse-mosquitto:latest
+    # restart: unless-stopped
+    # volumes:
+    #   - {{ base_directory }}/homeassistant/mosquitto/:/mosquitto/
+    # ports:
+    #   - "1883:1883"
+  # zigbee2mqtt:
+  #   networks: [main]
+  #   image: docker.io/koenkk/zigbee2mqtt:1.27.0@sha256:57650b07378ca37aa4ee050971cf79f7d682067966ccba6d76ab2e0f7d3adfa6
+  #   restart: unless-stopped
+  #   ports:
+  #     - target: 8080
+  #       published: 8080
+  #       protocol: tcp
+  #   volumes:
+  #     - {{ base_directory }}/homeassistant/zigbee2mqtt:/app/data
+  # zwavejs2mqtt:
+  #   networks: [main]
+  #   image: docker.io/zwavejs/zwavejs2mqtt:latest
+  #   restart: unless-stopped
+  #   volumes:
+  #     - {{ base_directory }}/homeassistant/zwavejs2mqtt/:/usr/src/app/store/
+  #   devices:
+  #     - "<REPLACE WITH THE PATH TO YOUR ZWAVE DEV>:/dev/zwave"
+  #   ports:
+  #     - "8091:8091"
+  #     - "3000:3000"
+  #   tty: true
+  #   stop_signal: SIGINT
+  #   environment:
+  #     SESSION_SECRET: "<REPLACE WITH A SESSION SECRET>"
+  #     ZWAVEJS_EXTERNAL_CONFIG: /usr/src/app/store/.config-db
+networks:
+  main:
+    external:
+      name: main
+  wgnet:
+    external:
+      name: wgnet

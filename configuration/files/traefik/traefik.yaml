@@ -28,7 +28,13 @@ providers:
   file:
     directory: /configuration/
     watch: true
-
+http:
+  services:
+    plex:
+        loadBalancer:
+            passHostHeader: false
+            servers:
+                - url: http://192.168.50.100:32400 # NOT CONTROLLABLE VIA VARIABLE
 # listen on 80/443, and redirect all 80 to 443 via 301
 entryPoints:
   web:

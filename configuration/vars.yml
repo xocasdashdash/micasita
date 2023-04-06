@@ -1,8 +1,23 @@
 tailscale_authkey: "{{ secret.tailscale_authkey }}"
 pihole_web_password: "{{ secret.pihole_web_password }}"
 ssl_config: "{{ secret.ssl_config }}"
-very_secret: "{{ secret.very_secret }}"
 eth0_mac_address: "{{ secret.eth0_mac_address }}"
 wifi_password: "{{ secret.wifi_password }}"
 wifi_name: "{{ secret.wifi_name }}"
 public_domain: "{{ secret.public_domain }}"
+wireguard: "{{ secret.wireguard }}"
+tz: "Europe/Madrid"
+servarr_config:
+  - name: "radarr"
+    port: 7878
+  - name: "sonarr"
+    port: 8989
+  - name: "bazarr"
+    port: 6767
+  - name: "prowlarr"
+    port: 9696
+    networks:
+      - wgnet
+  - name: "readarr"
+    port: 8787
+    imageTag: develop

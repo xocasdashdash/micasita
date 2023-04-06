@@ -76,7 +76,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -95,7 +95,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -112,7 +112,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -131,15 +131,15 @@
 
 - hosts: cerebrito
   tags:
-    - stararr
+    - servarr
     - services
   become: true
   tasks:
-    - name: Create configuration directories for transmissions
+    - name: Create configuration directories
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -166,7 +166,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -181,8 +181,6 @@
       with_fileglob:
         - "files/homeassistant/*"
       register: "ha_config"
-
-
 - hosts: cerebrito
   tags:
     - nodered
@@ -192,7 +190,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -206,7 +204,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
@@ -231,15 +229,15 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: "directory"
-        mode: "u=rwx,g=rwx,o=rwx"
+        mode: "u=rwx,g=rx,o=rx"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
-        - "{{ base_directory }}/certs"
+        - "{{ base_directory }}/traefik/certs"
         - "{{ base_directory }}/traefik/logs"
     - name: Copy certificates to directories
       ansible.builtin.copy:
-        dest: "{{ base_directory }}/certs/{{ item.key }}"
+        dest: "{{ base_directory }}/traefik/certs/{{ item.key }}"
         content: "{{ item.value }}"
         mode: "u=rwx,g=,o="
         owner: "{{ server_user }}"
@@ -250,30 +248,88 @@
     - name: Copy traefik configuration to remote
       ansible.builtin.template:
         src: "{{ item }}"
-        dest: "{{ base_directory}}"
+        dest: "{{ base_directory }}/traefik/"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
         mode: "u=rw,g=r,o=r"
-      loop: "{{ lookup('ansible.builtin.fileglob', 'files/traefik*', wantlist=True )}}"
+      loop: "{{ lookup('ansible.builtin.fileglob', 'files/traefik/*', wantlist=True )}}"
+- hosts: cerebrito
+  tags:
+    - wireguard
+  tasks:
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/wireguard"
+    - name: "Copy wireguard configuration to remote"
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/wireguard/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=r,g=,o="
+      loop: "{{ lookup('ansible.builtin.fileglob', 'files/wireguard/*', wantlist=True )}}"
+
 - hosts: cerebrito
   tags:
     - docker-compose
     - services
   tasks:
-    - name: Copy docker-compose file file
+    - name: Get infos on main network
+      community.docker.docker_network_info:
+        name: cerebrito_main
+      register: result
+    - name: "get info on WG network"
+      community.docker.docker_network_info:
+        name: wgnet
+      register: wg_network
+    - name: "Create a WG network with custom IPAM config"
+      community.docker.docker_network:
+        name: wgnet
+        ipam_config:
+          - subnet: 172.20.0.0/24
+      when: wg_network.exists == false
+    - name: Create a network with custom IPAM config
+      community.docker.docker_network:
+        name: main
+        ipam_config:
+          - subnet: 172.200.0.0/16
+        ipam_driver_options:
+          com.docker.network.bridge.name: hass
+      when: result.exists == false
+    - name: Create docker-compose directory
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/docker-compose"
+    - name: "Copy docker-compose files"
       ansible.builtin.template:
-        src: files/docker-compose.yml
-        dest: "{{ base_directory}}"
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/docker-compose/{{ item | basename | regex_replace('\\.j2$', '') }}"
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
         mode: "u=rw,g=r,o=r"
-      register: docker_compose
-    - name: Check to see if we want to restart the services
-      ansible.builtin.set_fact:
-        restart: "{{ docker_compose.changed or (ha_config is defined and ha_config.changed) or (mqtt_config is defined and mqtt_config.changed) }}"
-    - name: Fire up docker-compose.yml
+      with_fileglob:
+        - "files/docker-compose/*"
+      register: compose_files
+    - name: "Fire up docker-compose"
       community.docker.docker_compose:
         project_src: "{{ base_directory }}"
+        files: "{{ compose_files.results | map(attribute='dest') }}"
         pull: true
-        restarted: "{{ restart }}"
+        restarted: "true"
         state: "present"
+    - name: "Configure routes for wireguard"
+      ansible.builtin.shell: |
+        docker exec --privileged prowlarr ip route delete default || true;
+        docker exec --privileged prowlarr ip route add default via 172.20.0.100 || true;
+        docker exec --privileged prowlarr ip route add 192.168.50.0/24 via 172.200.0.1 || true;

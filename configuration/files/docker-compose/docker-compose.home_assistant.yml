@@ -1,0 +1,119 @@
+version: "3.8"
+services:
+  homeassistant:
+    networks: [main]
+    image: ghcr.io/home-assistant/home-assistant:stable@sha256:090d8cbd6f8675984ca1ca9d357d8aca97101c61f93f221e339731a702160887
+    volumes:
+      - "{{ base_directory }}/homeassistant/config/:/config/"
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    ports:
+      - target: 8123
+        published: 8123
+        protocol: tcp
+      - target: 21063
+        published: 21063
+        protocol: tcp
+      - target: 51827
+        published: 51827
+        protocol: tcp
+      - target: 51827
+        published: 51827
+        protocol: udp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.home_assistant.rule=Host(`homeassistant.{{ public_domain }}`)"
+      - "traefik.http.routers.home_assistant.entrypoints=websecure"
+      - "traefik.http.routers.home_assistant.tls=true"
+      - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
+  mqtt:
+    networks: [main]
+    image: docker.io/vernemq/vernemq:latest@sha256:ad389cb177e589d91f1fa79ea1abbb900f860e464b95421465c0231f78624266
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+      - "9001:9001"
+    environment:
+      DOCKER_VERNEMQ_ACCEPT_EULA: "yes"
+      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
+      DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD: "off"
+      DOCKER_VERNEMQ_LOG__CONSOLE: "console"
+      DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL: "warning"
+      DOCKER_VERNEMQ_LOG__CRASH: "on"
+      DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: "3,4,5"
+    volumes:
+      - "{{ base_directory }}/mqtt/data:/vernemq/data"
+      - "{{ base_directory }}/mqtt/log:/vernemq/log"
+      - "{{ base_directory }}/mqtt/vmq.acl:/vernemq/etc/vmq.acl"
+    labels:
+      - "traefik.enable=true"
+      ## TCP Routers/Service
+      - "traefik.tcp.routers.mqtt-tcp.entrypoints=mqtt"
+      - "traefik.tcp.routers.mqtt-tcp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mqtt-tcp.service=mqtt-tcp"
+      - "traefik.tcp.services.mqtt-tcp.loadbalancer.server.port=1883"
+  mdns-repeater:
+    image: docker.io/angelnu/mdns_repeater@sha256:2255ce3e36c75fb6180850510d035db5f51142890b2e3e3ccc14d19b484fe750
+    restart: unless-stopped
+    environment:
+      hostNIC: "eth0"
+      dockerNIC: "hass"
+    network_mode: host
+  nodered:
+    image: docker.io/nodered/node-red:3.0.2-16@sha256:524316b9b84cb5bbfe006c117f3dad31ee806804b12e4b866047a65e2080e92d
+    environment:
+      TZ: UTC
+    networks: [main]
+    volumes:
+      - "{{ base_directory }}/nodered:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nodered.rule=Host(`nodered.{{ public_domain }}`)"
+      - "traefik.http.routers.nodered.entrypoints=websecure"
+      - "traefik.http.routers.nodered.tls=true"
+      - "traefik.http.services.nodered.loadbalancer.server.port=8123"
+  pihole:
+    container_name: pihole
+    hostname: pihole
+    image: docker.io/pihole/pihole:latest@sha256:9da1360c747715c41cf327580d2cc064f04776674afe317abd99cac70cd65e82
+    networks: [main]
+    ports:
+      - '8053:80/tcp'
+      - '8853:53/tcp'
+      - '8853:53/udp'
+      #- "67:67/udp"
+    environment:
+      TZ: 'Europe/Madrid'
+      WEBPASSWORD: "{{ pihole_web_password }}"
+      VIRTUAL_HOST: pihole.{{ public_domain }}
+      VIRTUAL_PORT: 80
+      DNSMASQ_LISTENING: all
+      PIHOLE_INTERFACE: eth0
+    # Volumes store your data between container upgrades
+    volumes:
+      - '{{ base_directory }}/pihole/pihole:/etc/pihole'
+      - '{{ base_directory }}/pihole/dnsmasq.d:/etc/dnsmasq.d'
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.{{ public_domain }}`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      ## TCP Routers/Service
+      - "traefik.tcp.routers.pihole-dns-tcp.entrypoints=dns-tcp"
+      - "traefik.tcp.routers.pihole-dns-tcp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.pihole-dns-tcp.service=pihole-dns-tcp"
+      - "traefik.tcp.services.pihole-dns-tcp.loadbalancer.server.port=53"
+
+      ## TCP Routers/Service
+      - "traefik.udp.routers.pihole-dns-udp.entrypoints=dns-udp"
+      - "traefik.udp.routers.pihole-dns-udp.service=pihole-dns-udp"
+      - "traefik.udp.services.pihole-dns-udp.loadbalancer.server.port=53"
+networks:
+  main:
+    external:
+      name: main
+  wgnet:
+    external:
+      name: wgnet
