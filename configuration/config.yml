@@ -47,6 +47,27 @@
 - hosts: cerebrito
   become: true
   tags:
+    - storage
+  tasks:
+    - ansible.builtin.set_fact:
+        external_disk_available: false
+    - ansible.builtin.debug:
+        var: ansible_device_links.uuids
+    - name: "Check if device is available"
+      ansible.builtin.set_fact:
+        external_disk_available: true
+      when: item.value[0] == usb_uuid
+      with_dict: "{{ ansible_device_links.uuids }}"
+    - name: "Mount fs"
+      ansible.posix.mount:
+        path: /media/usb
+        src: "UUID={{ usb_uuid }}"
+        fstype: ntfs-3g
+        state: present
+
+- hosts: cerebrito
+  become: true
+  tags:
     - network
   tasks:
     - name: Copy netplan configuration files.
