@@ -24,6 +24,8 @@ services:
       - "{{ base_directory }}/plex:/config"
       - /data/movies:/movies
       - /data/tv:/tv
+      - /media/usb/Peliculas/:/Peliculas
+      - /media/usb/Shows/:/Shows
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
