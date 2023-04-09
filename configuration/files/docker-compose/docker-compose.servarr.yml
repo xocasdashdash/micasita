@@ -39,7 +39,7 @@ services:
       - "/data:/data"
 {% for config in servarr_config %}
   {{ config.name }}:
-    networks: 
+    networks:
       - main
 {% for network in config.networks |default([]) %}
       - {{ network }}
@@ -57,6 +57,9 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ={{ tz }}
+{% for env in config.environment|default([]) %}
+      - {{ env }}
+{% endfor %}
     volumes:
       - "{{ base_directory }}/arr/{{ config.name }}:/config"
       - "/data:/data"

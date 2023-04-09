@@ -1,24 +1,33 @@
 version: "3.8"
 services:
-  wireguard:
-    image: lscr.io/linuxserver/wireguard
-    container_name: wireguard
+  gluetun:
+    image: ghcr.io/qdm12/gluetun
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect. See https://github.com/qdm12/gluetun/wiki/Connect-a-container-to-gluetun#external-container-to-gluetun
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ tz }}
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 8080:8080/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
     volumes:
-      - "{{ base_directory }}/wireguard:/config"
-      - /lib/modules:/lib/modules
+      - "{{ base_directory }}/gluetun:/gluetun"
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY={{ wireguard.PrivateKey }}
+      - WIREGUARD_ADDRESSES={{ wireguard.Address }}
+      - TZ={{ tz }}
+      - SERVER_COUNTRIES=Norway
+      - DNS_ADDRESS=192.168.50.1
+      - HTTPPROXY=on
+      - HTTPPROXY_LISTENING_ADDRESS=:8080
+      - HTTPPROXY_LOG=on
     networks:
       wgnet:
         ipv4_address: 172.20.0.100
-    sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1
-    restart: unless-stopped
 networks:
   main:
     external:

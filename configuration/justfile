@@ -1,6 +1,6 @@
 
 default:
-
+  just --list
 # Installs all dependency
 install:
   ansible-galaxy role install -r requirements.yml --ignore-errors

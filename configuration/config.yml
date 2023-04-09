@@ -349,9 +349,4 @@
         pull: true
         restarted: "true"
         state: "present"
-        remove_orphans: true 
-    - name: "Configure routes for wireguard"
-      ansible.builtin.shell: |
-        docker exec --privileged prowlarr ip route delete default || true;
-        docker exec --privileged prowlarr ip route add default via 172.20.0.100 || true;
-        docker exec --privileged prowlarr ip route add 192.168.50.0/24 via 172.200.0.1 || true;
+        remove_orphans: true
