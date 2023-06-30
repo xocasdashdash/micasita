@@ -38,12 +38,12 @@
   roles:
     - geerlingguy.pip
     - geerlingguy.docker
-- hosts: cerebrito
-  become: true
-  tags:
-    - tailscale
-  roles:
-    - artis3n.tailscale
+# - hosts: cerebrito
+#   become: true
+#   tags:
+#     - tailscale
+#   roles:
+#     - artis3n.tailscale
 - hosts: cerebrito
   become: true
   tags:
