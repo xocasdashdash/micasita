@@ -1,0 +1,14 @@
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: stackgres-operator
+  namespace: kube-system
+spec:
+  chart: stackgres-operator
+  repo: https://stackgres.io/downloads/stackgres-k8s/stackgres/helm/
+  targetNamespace: stackgres
+  version: "1.5.0-rc2"
+  set:
+    adminui.service.type: LoadBalancer

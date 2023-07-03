@@ -1,0 +1,60 @@
+# ---
+# apiVersion: stackgres.io/v1beta1
+# kind: SGBackupConfig
+# metadata:
+#   name: simple
+# spec:
+#   storage:
+#     type: s3Compatible
+#     s3Compatible:
+#       bucket: stackgres
+#       region: k8s
+#       enablePathStyleAddressing: true
+#       endpoint: http://minio:9000
+#       awsCredentials:
+#         secretKeySelectors:
+#           accessKeyId:
+#             key: accesskey
+#             name: minio
+#           secretAccessKey:
+#             key: secretkey
+#             name: minio
+---
+apiVersion: stackgres.io/v1
+kind: SGCluster
+metadata:
+  name: homeassistant
+spec:
+  postgresVersion: 15
+  replicas: 1
+  pods:
+    persistentVolume:
+      size: '5Gi'
+  users:
+    - username: admin
+      password:
+        name: homeassistant-admin-password
+        key: password
+---
+apiVersion: stackgres.io/v1
+kind: SGScript
+metadata:
+  name: script
+spec:
+  managedVersions: true
+  continueOnError: false
+  scripts:
+  - name: create-stackgres-user
+    scriptFrom:
+      secretKeyRef: # read the user from a Secret to maintain credentials in a safe place
+        name: stackgres-secret-sqls-scripts
+        key: create-stackgres-user.sql
+  - name: create-stackgres-database
+    script: |
+            CREATE DATABASE stackgres WITH OWNER stackgres;
+  - name: create-stackgres-schema
+    database: stackgres
+    scriptFrom:
+      configMapKeyRef: # read long script from a ConfigMap to avoid have to much data in the helm releasea and the sgcluster CR
+        name: stackgres-sqls-scripts
+        key: create-stackgres-schema.sql

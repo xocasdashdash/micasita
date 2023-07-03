@@ -1,0 +1,28 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: zalando-pgsql-operator
+  namespace: kube-system
+spec:
+  chart: postgres-operator
+  repo: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
+  targetNamespace:  zalando-pgsql
+---
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: homeassistant
+  namespace: homeassistant
+spec:
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  users:
+    homeassistant_admin:  # database owner
+    - superuser
+    - createdb
+  preparedDatabases:
+    homeassistant: {}
+  postgresql:
+    version: "15"

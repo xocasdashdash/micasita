@@ -1,4 +1,4 @@
 .ansible
 ansible.cfg.full
 casita.encrypted
-
+secrets.yaml

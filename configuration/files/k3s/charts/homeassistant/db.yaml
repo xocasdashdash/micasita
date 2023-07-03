@@ -1,0 +1,19 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: homeassistant
+  namespace: homeassistant
+spec:
+  teamId: familia
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  users:
+    homeassistant_admin:  # database owner
+    - superuser
+    - createdb
+  preparedDatabases:
+    homeassistant:
+      defaultUsers: true
+  postgresql:
+    version: "15"
