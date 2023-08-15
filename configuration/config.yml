@@ -171,6 +171,7 @@
         - "{{ base_directory }}/arr/prowlarr"
         - "{{ base_directory }}/arr/radarr"
         - "{{ base_directory }}/arr/jackett"
+        - "{{ base_directory }}/jellyfin"
         - "/data"
         - "/data/movies"
         - "/data/shows"

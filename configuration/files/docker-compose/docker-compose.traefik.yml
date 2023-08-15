@@ -16,6 +16,7 @@ services:
     volumes:
       - "{{ base_directory }}/traefik/certs/:/certs/:ro"
       - "{{ base_directory }}/traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro"
+      - "{{ base_directory }}/traefik/traefik.jellyfin.toml:/configuration/traefik.jellyfin.toml:ro"
       - "{{ base_directory }}/traefik/traefik-tls.yaml:/configuration/traefik-tls.yaml:ro"
       - "{{ base_directory }}/traefik/logs:/logs"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
