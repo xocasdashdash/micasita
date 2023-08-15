@@ -24,6 +24,8 @@ services:
       - "{{ base_directory }}/plex:/config"
       - /data/movies:/movies
       - /data/tv:/tv
+      - /media/external_data/tv:/external_tv
+      - /media/external_data/movies:/external_movies
       - /media/usb/Peliculas/:/Peliculas
       - /media/usb/Shows/:/Shows
     restart: unless-stopped

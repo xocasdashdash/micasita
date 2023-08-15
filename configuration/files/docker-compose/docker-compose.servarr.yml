@@ -37,6 +37,8 @@ services:
     volumes:
       - "{{ base_directory }}/transmission:/config" # Change this to your docker config folder
       - "/data:/data"
+      - "/media/data:/media/data"
+      - "/media/external_data:/media/external_data"
 {% for config in servarr_config %}
   {{ config.name }}:
     networks:
@@ -63,6 +65,8 @@ services:
     volumes:
       - "{{ base_directory }}/arr/{{ config.name }}:/config"
       - "/data:/data"
+      - "/media/data:/media/data"
+      - "/media/external_data:/media/external_data"
 {% for vol in config.extraVolumes|default([]) %}
       - "{{ vol }}"
 {% endfor %}
