@@ -14,13 +14,14 @@ services:
       - /media/external_data/movies:/external_movies
       - /media/usb/Peliculas/:/Peliculas
       - /media/usb/Shows/:/Shows
-    group_add: # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
-      - '107' #render
+    group_add:
+    # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
+      - '109' #render
       - '44' #video
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=http://jellyfin.familiafg.es
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.familiafg.es
       - PUID=1000
       - PGID=1000
       - TZ={{ tz }}

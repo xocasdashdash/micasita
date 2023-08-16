@@ -173,6 +173,7 @@
         - "{{ base_directory }}/arr/jackett"
         - "{{ base_directory }}/jellyfin"
         - "/data"
+        - "/data/jellyfin_cache"
         - "/data/movies"
         - "/data/shows"
         - "/data/books"
