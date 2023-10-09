@@ -1,6 +1,5 @@
 tailscale_authkey: "{{ secret.tailscale_authkey }}"
 pihole_web_password: "{{ secret.pihole_web_password }}"
-ssl_config: "{{ secret.ssl_config }}"
 eth0_mac_address: "{{ secret.eth0_mac_address }}"
 wifi_password: "{{ secret.wifi_password }}"
 wifi_name: "{{ secret.wifi_name }}"

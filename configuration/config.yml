@@ -258,16 +258,12 @@
       with_items:
         - "{{ base_directory }}/traefik/certs"
         - "{{ base_directory }}/traefik/logs"
-    - name: Copy certificates to directories
-      ansible.builtin.copy:
-        dest: "{{ base_directory }}/traefik/certs/{{ item.key }}"
-        content: "{{ item.value }}"
-        mode: "u=rwx,g=,o="
-        owner: "{{ server_user }}"
-        group: "{{ server_user }}"
-      loop: "{{ lookup('ansible.builtin.dict', ssl_config) }}"
-      register: changed_certs
-      no_log: true
+- hosts: cerebrito
+  tags:
+    - ssl
+    - traefik
+    - services
+  tasks:
     - name: Copy traefik configuration to remote
       ansible.builtin.template:
         src: "{{ item }}"

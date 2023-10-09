@@ -9,20 +9,30 @@ services:
       - "traefik.http.routers.whoami.rule=Host(`whoami.{{ public_domain }}`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+
   traefik:
     networks: [main]
     image: docker.io/traefik:latest@sha256:4ebf68cdb32ce65e8786ac83ece782ec0dbe583471c04dfd0af43f245b96c88f
     restart: unless-stopped
     volumes:
-      - "{{ base_directory }}/traefik/certs/:/certs/:ro"
+      - "{{ base_directory }}/traefik/certs/:/letsencrypt/"
       - "{{ base_directory }}/traefik/traefik.yaml:/etc/traefik/traefik.yaml:ro"
       - "{{ base_directory }}/traefik/traefik.jellyfin.toml:/configuration/traefik.jellyfin.toml:ro"
       - "{{ base_directory }}/traefik/traefik-tls.yaml:/configuration/traefik-tls.yaml:ro"
       - "{{ base_directory }}/traefik/logs:/logs"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      - CLOUDFLARE_EMAIL={{ secret.cloudflare.email }}
+      - CLOUDFLARE_DNS_API_TOKEN={{ secret.cloudflare.token }}
     command:
       #- "--log.level=DEBUG"
       - --api.insecure=true
+      # Set up LetsEncrypt
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt.acme.email={{ secret.cloudflare.email }}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.defaultrule="Host(`{{ '{{' }} .Name {{ '}}' }}.{{ public_domain }}`)"
@@ -32,8 +42,8 @@ services:
       - --providers.file.watch=true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ public_domain }}`)"
       - "traefik.http.routers.dashboard.middlewares=redirect-to-dashboard"
@@ -41,6 +51,10 @@ services:
       - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.replacement=https://$$1/dashboard/"
       - "traefik.http.routers.dashboard.service=dashboard"
       - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+      # - "traefik.http.routers.traefik.tls=true"
+      # - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      # - "traefik.http.routers.traefik.rule=Host(`pihole.{{ public_domain }}`)"
+
     healthcheck:
       test:
         - CMD

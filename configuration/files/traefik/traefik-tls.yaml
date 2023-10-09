@@ -1,9 +1,9 @@
 tls:
-  certificates:
-    - certFile: /certs/{{ public_domain }}.certificate.pem
-      keyFile: /certs/{{ public_domain }}.private.pem
   stores:
     default:
-      defaultCertificate:
-        certFile: /certs/{{ public_domain }}.certificate.pem
-        keyFile: /certs/{{ public_domain }}.private.pem
+      defaultGeneratedCert:
+        resolver: letsencrypt
+        domain:
+          main: {{ secret.public_domain }}
+          sans:
+            - "*.{{ secret.public_domain }}"

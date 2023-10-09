@@ -28,6 +28,18 @@ providers:
   file:
     directory: /configuration/
     watch: true
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "{{ secret.cloudflare.email }}"
+      storage: "/letsencrypt/acme.json"
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - 1.1.1.1:53
+          - 8.8.8.8:53
+        delayBeforeCheck: 10
+
 http:
   services:
     plex:

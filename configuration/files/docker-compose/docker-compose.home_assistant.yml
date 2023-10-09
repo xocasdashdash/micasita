@@ -24,7 +24,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.home_assistant.rule=Host(`homeassistant.{{ public_domain }}`)"
       - "traefik.http.routers.home_assistant.entrypoints=websecure"
-      - "traefik.http.routers.home_assistant.tls=true"
+      - "traefik.http.routers.home_assistant.tls.certresolver=letsencrypt"
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
   mqtt:
     networks: [main]
@@ -70,7 +70,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.nodered.rule=Host(`nodered.{{ public_domain }}`)"
       - "traefik.http.routers.nodered.entrypoints=websecure"
-      - "traefik.http.routers.nodered.tls=true"
+      - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
       - "traefik.http.services.nodered.loadbalancer.server.port=8123"
   pihole:
     container_name: pihole
@@ -98,7 +98,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.pihole.rule=Host(`pihole.{{ public_domain }}`)"
       - "traefik.http.routers.pihole.entrypoints=websecure"
-      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"
       ## TCP Routers/Service
       - "traefik.tcp.routers.pihole-dns-tcp.entrypoints=dns-tcp"

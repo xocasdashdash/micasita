@@ -14,6 +14,7 @@ services:
       - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.{{ public_domain }}`)"
       - "traefik.http.routers.flaresolverr.entrypoints=websecure"
       - "traefik.http.routers.flaresolverr.tls=true"
+      - "traefik.http.routers.flaresolverr.tls.certresolver=letsencrypt"
       - "traefik.http.routers.flaresolverr.service=flaresolverr"
       - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
   transmission:
@@ -29,6 +30,7 @@ services:
       - "traefik.http.routers.transmission.rule=Host(`transmission.{{ public_domain }}`)"
       - "traefik.http.routers.transmission.entrypoints=websecure"
       - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.tls.certresolver=letsencrypt"
       - "traefik.http.routers.transmission.service=transmission"
       - "traefik.http.services.transmission.loadbalancer.server.port=9091"
     ports:
@@ -53,6 +55,7 @@ services:
       - "traefik.http.routers.{{ config.name }}.rule=Host(`{{ config.name }}.{{ public_domain }}`)"
       - "traefik.http.routers.{{ config.name }}.entrypoints=websecure"
       - "traefik.http.routers.{{ config.name }}.tls=true"
+      - "traefik.http.routers.{{ config.name }}.tls.certresolver=letsencrypt"
       - "traefik.http.routers.{{ config.name }}.service={{ config.name }}"
       - "traefik.http.services.{{ config.name }}.loadbalancer.server.port={{ config.port }}"
     environment:
