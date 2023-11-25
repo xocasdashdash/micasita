@@ -25,6 +25,7 @@ services:
       - HTTPPROXY=on
       - HTTPPROXY_LISTENING_ADDRESS=:8080
       - HTTPPROXY_LOG=on
+    restart: unless-stopped
     networks:
       wgnet:
         ipv4_address: 172.20.0.100

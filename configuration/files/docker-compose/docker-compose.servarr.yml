@@ -4,6 +4,7 @@ services:
     networks: [main]
     image: "ghcr.io/flaresolverr/flaresolverr:latest"
     container_name: "flaresolverr"
+    restart: unless-stopped
     environment:
       - PUID=1000
       - PGID=1000
@@ -21,6 +22,7 @@ services:
     networks: [main]
     image: "lscr.io/linuxserver/transmission:latest"
     container_name: "transmission"
+    restart: unless-stopped
     environment:
       - PUID=1000
       - PGID=1000

@@ -4,6 +4,7 @@ services:
     networks: [main]
     image: "traefik/whoami"
     container_name: "simple-service"
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.{{ public_domain }}`)"

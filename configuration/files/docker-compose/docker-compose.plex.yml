@@ -21,7 +21,7 @@ services:
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=https://jellyfin.familiafg.es
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.{{ public_domain }}
       - PUID=1000
       - PGID=1000
       - TZ={{ tz }}

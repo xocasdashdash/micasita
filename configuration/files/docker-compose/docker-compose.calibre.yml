@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  calibre:
+    networks:
+      - main
+    image: lscr.io/linuxserver/calibre-web:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+    volumes:
+      - "{{ base_directory }}/calibre:/config"
+      - /media/external_data/boooks:/books
+    restart: unless-stopped
+    container_name: calibre
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.calibre.rule=Host(`calibre.{{ public_domain }}`)"
+      - "traefik.http.routers.calibre.entrypoints=websecure"
+      - "traefik.http.routers.calibre.tls=true"
+      - "traefik.http.routers.calibre.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.calibre.service=calibre"
+      - "traefik.http.services.calibre.loadbalancer.server.port=8083"
+networks:
+  main:
+    external:
+      name: main
+  wgnet:
+    external:
+      name: wgnet
