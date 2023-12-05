@@ -28,7 +28,7 @@ services:
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
   mqtt:
     networks: [main]
-    image: docker.io/vernemq/vernemq:latest@sha256:ad389cb177e589d91f1fa79ea1abbb900f860e464b95421465c0231f78624266
+    image: docker.io/vernemq/vernemq:latest@sha256:00db31560102dc2d198607dc65fbb5b1eb73d9e6fb286b89b9a5ef9d6b0acebe
     restart: unless-stopped
     ports:
       - "8888:8888"
