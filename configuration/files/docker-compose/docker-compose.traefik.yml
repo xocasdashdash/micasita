@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.{{ public_domain }}`)"
+      - "traefik.http.routers.whoami.rule=HostRegexp(`whoami.{any:.+}`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls=true"
       - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
@@ -36,7 +36,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.defaultrule="Host(`{{ '{{' }} .Name {{ '}}' }}.{{ public_domain }}`)"
+      - --providers.docker.defaultrule="HostRegexp(`{{ '{{' }} .Name {{ '}}' }}.{any:.+}`)"
       - --entrypoints.web.address=:80
       - --entrypoints.web-secure.address=:443
       - --providers.file.directory=/configuration/
@@ -46,7 +46,7 @@ services:
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ public_domain }}`)"
+      - "traefik.http.routers.dashboard.rule=HostRegexp(`traefik.{any:.+}`)"
       - "traefik.http.routers.dashboard.middlewares=redirect-to-dashboard"
       - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.regex=^https:\\/\\/([^\\/]+)\\/?$$"
       - "traefik.http.middlewares.redirect-to-dashboard.redirectregex.replacement=https://$$1/dashboard/"
@@ -54,7 +54,7 @@ services:
       - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
       # - "traefik.http.routers.traefik.tls=true"
       # - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
-      # - "traefik.http.routers.traefik.rule=Host(`pihole.{{ public_domain }}`)"
+      # - "traefik.http.routers.traefik.rule=HostRegexp(`^pihole\.{{ public_domain }}$`)"
 
     healthcheck:
       test:

@@ -47,6 +47,22 @@
 - hosts: cerebrito
   become: true
   tags:
+    - ssl
+    - tailscale
+    - services
+  tasks:
+    - name: Create directories for tailscale subnet router
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/tailscale"
+- hosts: cerebrito
+  become: true
+  tags:
     - storage
   tasks:
     - ansible.builtin.set_fact:
@@ -125,6 +141,64 @@
 
 - hosts: cerebrito
   tags:
+    - servarr
+    - services
+  become: true
+  tasks:
+    - name: Create configuration directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/arr/"
+        - "{{ base_directory }}/arr/sonarr"
+        - "{{ base_directory }}/arr/radarr"
+        - "{{ base_directory }}/arr/readarr"
+        - "{{ base_directory }}/arr/prowlarr"
+        - "{{ base_directory }}/arr/radarr"
+        - "{{ base_directory }}/arr/jackett"
+        - "{{ base_directory }}/jellyfin"
+        - "{{ base_directory }}/actual_server"
+        - "{{ base_directory }}/katrina-budget"
+        - "/data"
+        - "/data/jellyfin_cache"
+        - "/data/movies"
+        - "/data/shows"
+        - "/data/books"
+        - "/data/tv"
+        - "/media/data/downloads"
+        - "/media/data/incomplete-downloads"
+- hosts: cerebrito
+  tags:
+    - sabnzbd
+    - services
+  become: true
+  tasks:
+    - name: Create storage directory for sabnzbd
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "/media/data/downloads"
+        - "/media/data/incomplete-downloads"
+    - name: Copy configuration files for sabnzbd
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/sabnzbd"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      with_fileglob:
+        - "files/sabnzbd/*"
+      register: "sabnzbd_config"
+- hosts: cerebrito
+  tags:
     - transmission
     - services
   become: true
@@ -149,36 +223,6 @@
       with_fileglob:
         - "files/transmission/*"
       register: "transmission_config"
-
-- hosts: cerebrito
-  tags:
-    - servarr
-    - services
-  become: true
-  tasks:
-    - name: Create configuration directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: "directory"
-        mode: "u=rwx,g=rx,o=rx"
-        owner: "{{ server_user }}"
-        group: "{{ server_user }}"
-      with_items:
-        - "{{ base_directory }}/arr/"
-        - "{{ base_directory }}/arr/sonarr"
-        - "{{ base_directory }}/arr/radarr"
-        - "{{ base_directory }}/arr/readarr"
-        - "{{ base_directory }}/arr/prowlarr"
-        - "{{ base_directory }}/arr/radarr"
-        - "{{ base_directory }}/arr/jackett"
-        - "{{ base_directory }}/jellyfin"
-        - "/data"
-        - "/data/jellyfin_cache"
-        - "/data/movies"
-        - "/data/shows"
-        - "/data/books"
-        - "/data/tv"
-
 - hosts: cerebrito
   tags:
     - homeassistant

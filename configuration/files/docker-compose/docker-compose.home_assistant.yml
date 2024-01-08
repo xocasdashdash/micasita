@@ -22,7 +22,7 @@ services:
         protocol: udp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.home_assistant.rule=Host(`homeassistant.{{ public_domain }}`)"
+      - "traefik.http.routers.home_assistant.rule=HostRegexp(`homeassistant.{any:.+}`)"
       - "traefik.http.routers.home_assistant.entrypoints=websecure"
       - "traefik.http.routers.home_assistant.tls.certresolver=letsencrypt"
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
@@ -69,7 +69,7 @@ services:
       - "{{ base_directory }}/nodered:/data"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nodered.rule=Host(`nodered.{{ public_domain }}`)"
+      - "traefik.http.routers.nodered.rule=HostRegexp(`nodered.{any:.+}`)"
       - "traefik.http.routers.nodered.entrypoints=websecure"
       - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
       - "traefik.http.services.nodered.loadbalancer.server.port=8123"
@@ -97,7 +97,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(`pihole.{{ public_domain }}`)"
+      - "traefik.http.routers.pihole.rule=HostRegexp(`pihole.{any:.+}`)"
       - "traefik.http.routers.pihole.entrypoints=websecure"
       - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
       - "traefik.http.services.pihole.loadbalancer.server.port=80"

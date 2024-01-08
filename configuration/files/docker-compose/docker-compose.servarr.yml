@@ -12,37 +12,12 @@ services:
       - LOG_LEVEL=info
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.{{ public_domain }}`)"
+      - "traefik.http.routers.flaresolverr.rule=HostRegexp(`flaresolverr.{any:.+}`)"
       - "traefik.http.routers.flaresolverr.entrypoints=websecure"
       - "traefik.http.routers.flaresolverr.tls=true"
       - "traefik.http.routers.flaresolverr.tls.certresolver=letsencrypt"
       - "traefik.http.routers.flaresolverr.service=flaresolverr"
       - "traefik.http.services.flaresolverr.loadbalancer.server.port=8191"
-  transmission:
-    networks: [main]
-    image: "lscr.io/linuxserver/transmission:latest"
-    container_name: "transmission"
-    restart: unless-stopped
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ tz }}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.transmission.rule=Host(`transmission.{{ public_domain }}`)"
-      - "traefik.http.routers.transmission.entrypoints=websecure"
-      - "traefik.http.routers.transmission.tls=true"
-      - "traefik.http.routers.transmission.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.transmission.service=transmission"
-      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
-    ports:
-      - 51414:51414 # Torrent port (TCP)
-      - 51414:51414/udp # Torrent port (UDP)
-    volumes:
-      - "{{ base_directory }}/transmission:/config" # Change this to your docker config folder
-      - "/data:/data"
-      - "/media/data:/media/data"
-      - "/media/external_data:/media/external_data"
 {% for config in servarr_config %}
   {{ config.name }}:
     networks:
@@ -54,7 +29,7 @@ services:
     container_name: {{ config.name }}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.{{ config.name }}.rule=Host(`{{ config.name }}.{{ public_domain }}`)"
+      - "traefik.http.routers.{{ config.name }}.rule=HostRegexp(`{{ config.name }}.{any:.+}`)"
       - "traefik.http.routers.{{ config.name }}.entrypoints=websecure"
       - "traefik.http.routers.{{ config.name }}.tls=true"
       - "traefik.http.routers.{{ config.name }}.tls.certresolver=letsencrypt"
@@ -72,6 +47,8 @@ services:
       - "/data:/data"
       - "/media/data:/media/data"
       - "/media/external_data:/media/external_data"
+      - "/media/data/downloads:/downloads"
+      - "/media/data/incomplete-downloads:/incomplete-downloads"
 {% for vol in config.extraVolumes|default([]) %}
       - "{{ vol }}"
 {% endfor %}

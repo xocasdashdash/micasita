@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  sabnzbd:
+    networks: [main]
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - "{{ base_directory }}/sabnzbd:/config" # Change this to your docker config folder
+      - "/media/data/downloads:/downloads"
+      - "/media/data/incomplete-downloads:/incomplete-downloads"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.rule=HostRegexp(`sabnzbd.{any:.+}`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=websecure"
+      - "traefik.http.routers.sabnzbd.tls=true"
+      - "traefik.http.routers.sabnzbd.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.sabnzbd.service=sabnzbd"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
+    restart: unless-stopped
+  transmission:
+    networks: [main]
+    image: "lscr.io/linuxserver/transmission:latest"
+    container_name: "transmission"
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.transmission.rule=HostRegexp(`transmission.{any:.+}`)"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.transmission.service=transmission"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
+    ports:
+      - 51414:51414 # Torrent port (TCP)
+      - 51414:51414/udp # Torrent port (UDP)
+    volumes:
+      - "{{ base_directory }}/transmission:/config" # Change this to your docker config folder
+      - "/data:/data"
+      - "/media/data:/media/data"
+      - "/media/external_data:/media/external_data"
+networks:
+  main:
+    external:
+      name: main
+  wgnet:
+    external:
+      name: wgnet

@@ -21,7 +21,7 @@ services:
     restart: 'unless-stopped'
     # Optional - alternative address used for autodiscovery
     environment:
-      - JELLYFIN_PublishedServerUrl=https://jellyfin.{{ public_domain }}
+      #- JELLYFIN_PublishedServerUrl=https://jellyfin.{{ public_domain }}
       - PUID=1000
       - PGID=1000
       - TZ={{ tz }}
@@ -32,7 +32,7 @@ services:
     privileged: true
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.{{ public_domain }}`)"
+      - "traefik.http.routers.jellyfin.rule=HostRegexp(`jellyfin.{any:.+}`)"
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls=true"
       - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
@@ -73,54 +73,54 @@ services:
       - 'traefik.http.services.jellyfin-svc.loadBalancer.passHostHeader=true'
       ## Redirection of HTTP on port 9999 to HTTPS on port 9999 (consistent protocol)
       - 'traefik.http.routers.jellyfin-insecure.entryPoints=websecure'
-      - 'traefik.http.routers.jellyfin-insecure.rule=Host(`jellyfin.{{ public_domain }}`)' # OPTIONAL: && PathPrefix(`/jellyfin`)
+      - 'traefik.http.routers.jellyfin-insecure.rule=HostRegexp(`jellyfin.{any:.+}`)' # OPTIONAL: && PathPrefix(`/jellyfin`)
       - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw'
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.scheme=https'
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.port=9999' # remove if you are using a default port
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.permanent=false'
       - 'traefik.http.routers.jellyfin-insecure.service=noop@internal'
-  plex:
-    image: lscr.io/linuxserver/plex:latest
-    container_name: plex
-    network_mode: host
-    # networks: [main]
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ tz }}
-      - ADVERTISE_IP=http://192.168.50.100:32400/
-      - ALLOWED_NETWORKS=192.168.50.0/24,172.16.0.0/16
-    # ports:
-    #   - 32400:32400/tcp
-    #   - 8324:8324/tcp
-    #   - 32469:32469/tcp
-    #   - 1900:1900/udp
-    #   - 32410:32410/udp
-    #   - 32412:32412/udp
-    #   - 32413:32413/udp
-    #   - 32414:32414/udp
-    volumes:
-      - "{{ base_directory }}/plex:/config"
-      - /data/movies:/movies
-      - /data/tv:/tv
-      - /media/external_data/tv:/external_tv
-      - /media/external_data/movies:/external_movies
-      - /media/usb/Peliculas/:/Peliculas
-      - /media/usb/Shows/:/Shows
-    restart: unless-stopped
-    devices:
-      - "/dev/dri/card0:/dev/dri/card0"
-      - "/dev/dri/renderD128:/dev/dri/renderD128"
-    privileged: true
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.plex.rule=Host(`plex.{{ public_domain }}`)"
-      - "traefik.http.routers.plex.entrypoints=websecure"
-      - "traefik.http.routers.plex.tls=true"
-      #- "traefik.http.services.plex.loadbalancer.server.port=32400"
-      #- "traefik.http.services.plex.loadbalancer.server.url=http://192.168.50.100:32400"
+#   plex:
+#     image: lscr.io/linuxserver/plex:latest
+#     container_name: plex
+#     network_mode: host
+#     # networks: [main]
+#     environment:
+#       - PUID=1000
+#       - PGID=1000
+#       - TZ={{ tz }}
+#       - ADVERTISE_IP=http://192.168.50.100:32400/
+#       - ALLOWED_NETWORKS=192.168.50.0/24,172.16.0.0/16
+#     # ports:
+#     #   - 32400:32400/tcp
+#     #   - 8324:8324/tcp
+#     #   - 32469:32469/tcp
+#     #   - 1900:1900/udp
+#     #   - 32410:32410/udp
+#     #   - 32412:32412/udp
+#     #   - 32413:32413/udp
+#     #   - 32414:32414/udp
+#     volumes:
+#       - "{{ base_directory }}/plex:/config"
+#       - /data/movies:/movies
+#       - /data/tv:/tv
+#       - /media/external_data/tv:/external_tv
+#       - /media/external_data/movies:/external_movies
+#       - /media/usb/Peliculas/:/Peliculas
+#       - /media/usb/Shows/:/Shows
+#     restart: unless-stopped
+#     devices:
+#       - "/dev/dri/card0:/dev/dri/card0"
+#       - "/dev/dri/renderD128:/dev/dri/renderD128"
+#     privileged: true
+#     labels:
+#       - "traefik.enable=true"
+#       - "traefik.http.routers.plex.rule=HostRegexp(`plex.{any:.+}`)"
+#       - "traefik.http.routers.plex.entrypoints=websecure"
+#       - "traefik.http.routers.plex.tls=true"
+#       #- "traefik.http.services.plex.loadbalancer.server.port=32400"
+#       #- "traefik.http.services.plex.loadbalancer.server.url=http://192.168.50.100:32400"
 
-#      - "traefik.http.routers.plex.service=plex"
+# #      - "traefik.http.routers.plex.service=plex"
 networks:
   main:
     external:

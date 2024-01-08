@@ -15,7 +15,7 @@ services:
     container_name: calibre
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.calibre.rule=Host(`calibre.{{ public_domain }}`)"
+      - "traefik.http.routers.calibre.rule=HostRegexp(`calibre.{any:.+}`)"
       - "traefik.http.routers.calibre.entrypoints=websecure"
       - "traefik.http.routers.calibre.tls=true"
       - "traefik.http.routers.calibre.tls.certresolver=letsencrypt"

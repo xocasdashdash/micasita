@@ -1,0 +1,29 @@
+services:
+  budget-katrina:
+    networks: [main]
+    image: docker.io/actualbudget/actual-server:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.katrina-budget.rule=HostRegexp(`katrina-budget.{any:.+}`)"
+      - "traefik.http.routers.katrina-budget.entrypoints=websecure"
+      - "traefik.http.routers.katrina-budget.tls.certresolver=letsencrypt"
+      - "traefik.http.services.katrina-budget.loadbalancer.server.port=5006"
+    volumes:
+      # Change './actual-data' below to the path to the folder you want Actual to store its data in on your server.
+      # '/data' is the path Actual will look for its files in by default, so leave that as-is.
+      - "{{ base_directory }}/katrina-budget:/data"
+    restart: unless-stopped
+  actual_server:
+    networks: [main]
+    image: docker.io/actualbudget/actual-server:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.actual.rule=HostRegexp(`actual.{any:.+}`)"
+      - "traefik.http.routers.actual.entrypoints=websecure"
+      - "traefik.http.routers.actual.tls.certresolver=letsencrypt"
+      - "traefik.http.services.actual.loadbalancer.server.port=5006"
+    volumes:
+      # Change './actual-data' below to the path to the folder you want Actual to store its data in on your server.
+      # '/data' is the path Actual will look for its files in by default, so leave that as-is.
+      - "{{ base_directory }}/actual_server:/data"
+    restart: unless-stopped
