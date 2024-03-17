@@ -14,7 +14,7 @@ services:
 
   traefik:
     networks: [main]
-    image: docker.io/traefik:latest@sha256:4ebf68cdb32ce65e8786ac83ece782ec0dbe583471c04dfd0af43f245b96c88f
+    image: docker.io/traefik:latest@sha256:0a5157f742d2900389da6ce60ea80cc476801dc951917a993cd848d982f58265
     restart: unless-stopped
     volumes:
       - "{{ base_directory }}/traefik/certs/:/letsencrypt/"
