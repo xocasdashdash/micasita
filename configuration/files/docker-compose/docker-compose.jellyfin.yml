@@ -14,6 +14,8 @@ services:
       - /media/external_data/movies:/external_movies
       - /media/usb/Peliculas/:/Peliculas
       - /media/usb/Shows/:/Shows
+      - /media/data/movies/:/data_movies
+      - /media/data/tv/:/data_tv
     group_add:
     # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
       - '109' #render
