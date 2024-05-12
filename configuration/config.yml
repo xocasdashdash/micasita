@@ -38,12 +38,31 @@
   roles:
     - geerlingguy.pip
     - geerlingguy.docker
-# - hosts: cerebrito
-#   become: true
-#   tags:
-#     - tailscale
-#   roles:
-#     - artis3n.tailscale
+  tasks:
+    - name: "Create a dropin to force disks to be available"
+      block:
+        - name: Create folder
+          ansible.builtin.file:
+            path: "/etc/systemd/system/docker.service.d/"
+            owner: root
+            group: root
+        - name: Copy dropin files
+          ansible.builtin.template:
+            src: "{{ item }}"
+            dest: "/etc/systemd/system/docker.service.d/"
+            owner: "{{ server_user }}"
+            group: "{{ server_user }}"
+            mode: "u=rw,g=r,o=r"
+          with_fileglob:
+            - "files/cerebrito/docker.service.d/*"
+          register: files_copied
+        - name: Restart docker service
+          ansible.builtin.systemd_service:
+            state: restarted
+            daemon_reload: true
+            name: docker
+          when: files_copied.changed
+
 - hosts: cerebrito
   become: true
   tags:

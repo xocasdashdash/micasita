@@ -8,14 +8,16 @@ services:
     volumes:
       - "{{ base_directory }}/jellyfin:/config"
       - /data/jellyfin_cache:/cache
-      - /data/movies:/movies
-      - /data/tv:/tv
-      - /media/external_data/tv:/external_tv
-      - /media/external_data/movies:/external_movies
-      - /media/usb/Peliculas/:/Peliculas
-      - /media/usb/Shows/:/Shows
-      - /media/data/movies/:/data_movies
-      - /media/data/tv/:/data_tv
+      # Movies
+      - /media/external_data/movies:/movies/external_data
+      - /media/usb/Peliculas/:/movies/usb_ntfs
+      - /media/data/movies:/movies/intel_nuc_media
+
+      # TV
+      - /media/external_data/tv:/tv/external_data
+      - /media/usb/Shows/:/tv/usb_ntfs
+      - /media/data/tv:/tv/intel_nuc_media
+
     group_add:
     # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
       - '109' #render
