@@ -2,7 +2,7 @@ version: "3.8"
 services:
   homeassistant:
     networks: [main]
-    image: ghcr.io/home-assistant/home-assistant:stable@sha256:090d8cbd6f8675984ca1ca9d357d8aca97101c61f93f221e339731a702160887
+    image: ghcr.io/home-assistant/home-assistant:stable@sha256:17d159928122e6f374bd39b0e75904522bc7d7c2a64e88b248948734e4c4d444
     volumes:
       - "{{ base_directory }}/homeassistant/config/:/config/"
       - /etc/localtime:/etc/localtime:ro
