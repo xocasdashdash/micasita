@@ -12,11 +12,12 @@ services:
       - /media/external_data/movies:/movies/external_data
       - /media/usb/Peliculas/:/movies/usb_ntfs
       - /media/data/movies:/movies/intel_nuc_media
-
+      - /media/usb-data/movies:/movies/usb-data
       # TV
       - /media/external_data/tv:/tv/external_data
       - /media/usb/Shows/:/tv/usb_ntfs
       - /media/data/tv:/tv/intel_nuc_media
+      - /media/usb-data/tv:/tv/usb-data
 
     group_add:
     # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
@@ -30,6 +31,9 @@ services:
       - PGID=1000
       - TZ={{ tz }}
       - ALLOWED_NETWORKS=192.168.50.0/24,172.16.0.0/16
+      # Configs for jellyfin to fix issue with wall-e
+      - JELLYFIN_FFmpeg__probesize=100000000
+      - JELLYFIN_FFmpeg__analyzeduration=100000000
     devices:
       - "/dev/dri/card0:/dev/dri/card0"
       - "/dev/dri/renderD128:/dev/dri/renderD128"

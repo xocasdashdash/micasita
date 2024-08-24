@@ -47,6 +47,7 @@ services:
       - "/data:/data"
       - "/media/data:/media/data"
       - "/media/external_data:/media/external_data"
+      - "/media/usb-data:/media/usb-data"
       - "/media/data/downloads:/downloads"
       - "/media/data/incomplete-downloads:/incomplete-downloads"
 {% for vol in config.extraVolumes|default([]) %}

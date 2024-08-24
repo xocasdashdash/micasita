@@ -99,6 +99,20 @@
         src: "UUID={{ usb_uuid }}"
         fstype: ntfs-3g
         state: present
+    - name: Create mountpoint
+      ansible.builtin.file:
+        path: "/media/usb-data"
+        state: directory
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+    - name: "Mount new fs"
+      ansible.posix.mount:
+        path: /media/usb-data
+        src: "UUID={{ secret.storage.data }}"
+        fstype: ext4
+        state: present
+
 
 - hosts: cerebrito
   become: true
