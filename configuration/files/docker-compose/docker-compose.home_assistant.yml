@@ -1,8 +1,22 @@
 version: "3.8"
 services:
+  homeassistant_db:
+    networks: [main]
+    container_name: postgres
+    image: postgres:latest@sha256:4ec37d2a07a0067f176fdcc9d4bb633a5724d2cc4f892c7a2046d054bb6939e5
+    environment:
+      POSTGRES_USER: postgresql
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: "this-is-a-very-secure-password"
+      POSTGRES_DB: ha
+    ports:
+      - "5432:5432"
+    volumes:
+      - "{{ base_directory }}/postgresql-data:/var/lib/postgresql/data"
   homeassistant:
     networks: [main]
-    image: ghcr.io/home-assistant/home-assistant:stable@sha256:090d8cbd6f8675984ca1ca9d357d8aca97101c61f93f221e339731a702160887
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable@sha256:1ad29727bdfe3f6422c231f3eb269a90eabb289ed00583ca423547b039a2c24f
     volumes:
       - "{{ base_directory }}/homeassistant/config/:/config/"
       - /etc/localtime:/etc/localtime:ro

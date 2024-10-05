@@ -16,4 +16,4 @@ spec:
     homeassistant:
       defaultUsers: true
   postgresql:
-    version: "15"
+    version: "17"

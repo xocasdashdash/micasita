@@ -195,7 +195,7 @@
         - "{{ base_directory }}/arr/jackett"
         - "{{ base_directory }}/jellyfin"
         - "{{ base_directory }}/actual_server"
-        - "{{ base_directory }}/katrina-budget"
+        - "{{ base_directory }}/postgresql-data"
         - "/data"
         - "/data/jellyfin_cache"
         - "/data/movies"
