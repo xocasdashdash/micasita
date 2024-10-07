@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   homeassistant_db:
     networks: [main]
@@ -127,8 +126,6 @@ services:
       - "traefik.udp.services.pihole-dns-udp.loadbalancer.server.port=53"
 networks:
   main:
-    external:
-      name: main
+    external: true
   wgnet:
-    external:
-      name: wgnet
+    external: true

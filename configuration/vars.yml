@@ -18,6 +18,3 @@ servarr_config:
     port: 9696
     networks:
       - wgnet
-  - name: "readarr"
-    port: 8787
-    imageTag: develop

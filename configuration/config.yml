@@ -418,10 +418,10 @@
         - "files/docker-compose/*"
       register: compose_files
     - name: "Fire up docker-compose"
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         project_src: "{{ base_directory }}"
         files: "{{ compose_files.results | map(attribute='dest') }}"
-        pull: true
-        restarted: "true"
+        pull: "always"
         state: "present"
-        remove_orphans: true
+        recreate: "always"
+        remove_orphans: false

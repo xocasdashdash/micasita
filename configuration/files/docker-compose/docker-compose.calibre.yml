@@ -1,6 +1,31 @@
-version: "3.8"
 services:
-  calibre:
+  readarr:
+    networks:
+      - main
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.readarr.rule=HostRegexp(`readarr.{any:.+}`)"
+      - "traefik.http.routers.readarr.entrypoints=websecure"
+      - "traefik.http.routers.readarr.tls=true"
+      - "traefik.http.routers.readarr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.readarr.service=readarr"
+      - "traefik.http.services.readarr.loadbalancer.server.port=8787"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+    volumes:
+      - "{{ base_directory }}/arr/readarr:/config"
+      - "/data:/data"
+      - "/media/data:/media/data"
+      - "/media/external_data:/media/external_data"
+      - "/media/usb-data:/media/usb-data"
+      - "/media/data/downloads:/downloads"
+      - "/media/data/incomplete-downloads:/incomplete-downloads"
+    restart: unless-stopped
+  calibreweb:
     networks:
       - main
     image: lscr.io/linuxserver/calibre-web:latest
@@ -9,22 +34,54 @@ services:
       - PGID=1000
       - TZ={{ tz }}
     volumes:
-      - "{{ base_directory }}/calibre:/config"
-      - /media/external_data/boooks:/books
+      - "{{ base_directory }}/calibre-web:/config"
+      - /media/external_data/books:/books
     restart: unless-stopped
-    container_name: calibre
+    container_name: calibre-web
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.calibre-web.rule=HostRegexp(`calibre-web.{any:.+}`)"
+      - "traefik.http.routers.calibre-web.entrypoints=websecure"
+      - "traefik.http.routers.calibre-web.tls=true"
+      - "traefik.http.routers.calibre-web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.calibre-web.service=calibre-web"
+      - "traefik.http.services.calibre-web.loadbalancer.server.port=8083"
+
+
+  calibre:
+    networks:
+      - main
+    image: lscr.io/linuxserver/calibre:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ tz }}
+      - DRINODE=/dev/dri/renderD128
+    volumes:
+      - "{{ base_directory }}/calibre:/config"
+      - /media/external_data/books:/books
+    restart: unless-stopped
+    container_name: calibre
+
+    devices:
+      - "/dev/dri/card0:/dev/dri/card0"
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.calibre-app.rule=HostRegexp(`calibre-app.{any:.+}`)"
+      - "traefik.http.routers.calibre-app.entrypoints=websecure"
+      - "traefik.http.routers.calibre-app.tls=true"
+      - "traefik.http.routers.calibre-app.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.calibre-app.service=calibre-app"
+      - "traefik.http.services.calibre-app.loadbalancer.server.port=8080"
       - "traefik.http.routers.calibre.rule=HostRegexp(`calibre.{any:.+}`)"
       - "traefik.http.routers.calibre.entrypoints=websecure"
       - "traefik.http.routers.calibre.tls=true"
       - "traefik.http.routers.calibre.tls.certresolver=letsencrypt"
       - "traefik.http.routers.calibre.service=calibre"
-      - "traefik.http.services.calibre.loadbalancer.server.port=8083"
+      - "traefik.http.services.calibre.loadbalancer.server.port=8081"
 networks:
   main:
-    external:
-      name: main
+    external: true
   wgnet:
-    external:
-      name: wgnet
+    external: true

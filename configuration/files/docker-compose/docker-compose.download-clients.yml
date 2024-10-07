@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   sabnzbd:
     networks: [main]
@@ -48,8 +47,6 @@ services:
       - "/media/external_data:/media/external_data"
 networks:
   main:
-    external:
-      name: main
+    external: true
   wgnet:
-    external:
-      name: wgnet
+    external: true
