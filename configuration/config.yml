@@ -186,6 +186,7 @@
         owner: "{{ server_user }}"
         group: "{{ server_user }}"
       with_items:
+        - "{{ base_directory }}/ts-jellyfin"
         - "{{ base_directory }}/arr/"
         - "{{ base_directory }}/arr/sonarr"
         - "{{ base_directory }}/arr/radarr"
@@ -349,6 +350,21 @@
         group: "{{ server_user }}"
         mode: "u=rw,g=r,o=r"
       loop: "{{ lookup('ansible.builtin.fileglob', 'files/traefik/*', wantlist=True )}}"
+- hosts: cerebrito
+  tags:
+    - jellyfin
+    - tailscale
+    - services
+  tasks:
+    - name: Copy jellyfin configuration to remote
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ base_directory }}/ts-jellyfin/"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+        mode: "u=rw,g=r,o=r"
+      loop: "{{ lookup('ansible.builtin.fileglob', 'files/ts-jellyfin/*', wantlist=True )}}"
+
 - hosts: cerebrito
   tags:
     - wireguard

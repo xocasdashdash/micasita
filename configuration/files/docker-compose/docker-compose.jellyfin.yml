@@ -1,8 +1,37 @@
 services:
+  ts-jellyfin:
+    networks: [main]
+    image: tailscale/tailscale:latest
+    hostname: ts-jellyfin
+    environment:
+      - TS_AUTHKEY={{ secret.tailscale.oauth.jellyfin.secret }}
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_SERVE_CONFIG=/config.json
+    volumes:
+      - "{{ base_directory }}/ts-jellyfin/state:/var/lib/tailscale"
+      - "{{ base_directory }}/ts-jellyfin/config.json:/config.json"
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=HostRegexp(`jellyfin.{any:.+}`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin.tls=true"
+      - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.jellyfin.service=jellyfin"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw'
+      - 'traefik.http.middlewares.jellyfin-mw.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex'
+
   jellyfin:
     image: jellyfin/jellyfin
     container_name: jellyfin
-    network_mode: 'host'
+    network_mode: 'service:ts-jellyfin'
     user: 1000:1000
     volumes:
       - "{{ base_directory }}/jellyfin:/config"
@@ -17,7 +46,6 @@ services:
       - /media/usb/Shows/:/tv/usb_ntfs
       - /media/data/tv:/tv/intel_nuc_media
       - /media/usb-data/tv:/tv/usb-data
-
     group_add:
     # by id as these may not exist within the container. Needed to provide permissions to the VAAPI Devices
       - '109' #render
@@ -43,7 +71,8 @@ services:
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls=true"
       - "traefik.http.routers.jellyfin.tls.certresolver=letsencrypt"
-      - 'traefik.http.routers.jellyfin.tls.domains=jellyfin.{{ public_domain }}'
+      - "traefik.http.routers.jellyfin.service=jellyfin"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
       ## Middleware
       - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw'
       #### The customResponseHeaders option lists the Header names and values to apply to the response.
@@ -74,10 +103,6 @@ services:
       #### The customFrameOptionsValue allows the X-Frame-Options header value to be set with a custom value. This
       #### overrides the FrameDeny option.
       #- "traefik.http.middlewares.jellyfin-mw.headers.customFrameOptionsValue='allow-from https://jellyfin.{{ public_domain }}'"
-      # We define the port here as a port is required, but note that the service is pointing to the service defined in @file
-      - 'traefik.http.routers.jellyfin.service=jellyfin-svc@file'
-      - 'traefik.http.services.jellyfin-svc.loadBalancer.server.port=8096'
-      - 'traefik.http.services.jellyfin-svc.loadBalancer.passHostHeader=true'
       ## Redirection of HTTP on port 9999 to HTTPS on port 9999 (consistent protocol)
       - 'traefik.http.routers.jellyfin-insecure.entryPoints=websecure'
       - 'traefik.http.routers.jellyfin-insecure.rule=HostRegexp(`jellyfin.{any:.+}`)' # OPTIONAL: && PathPrefix(`/jellyfin`)
