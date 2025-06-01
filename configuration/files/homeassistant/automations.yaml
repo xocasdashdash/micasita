@@ -24,7 +24,7 @@
       seconds: 0
   condition: []
   action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
     message: Abre la ventana
@@ -44,7 +44,7 @@
     - thu
     - fri
   action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
     message: Cambia la mesa y ponte en alto
@@ -64,7 +64,7 @@
     - thu
     - fri
   action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
     message: Cambia la mesa y ponte en alto
@@ -85,7 +85,7 @@
       seconds: 0
   condition: []
   action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
     message: Potencia > 3.5KW vigila los valores
@@ -93,9 +93,8 @@
 - id: '1727617005120'
   alias: power-too-high
   description: ''
-  trigger:
+  triggers:
   - type: power
-    platform: device
     device_id: 5ea25894f6bf324d4ad4c92b7d792f89
     entity_id: sensor.principal_power
     domain: sensor
@@ -104,12 +103,14 @@
       hours: 0
       minutes: 2
       seconds: 0
-  condition: []
-  action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+    trigger: device
+  conditions: []
+  actions:
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
-    message: Potencia > 5KW cuidado!!
+    message: Power too high
+    title: Power too high
   mode: single
 - id: '1727624091670'
   alias: living-room-air-ok
@@ -137,12 +138,53 @@
       seconds: 0
   condition:
   - condition: template
-    value_template: |
-      {% set last_triggered = state_attr(''automation.air_the_living_room'', ''last_triggered'') %}
-      {{ last_triggered and (now() - last_triggered).total_seconds() < 3600}}
+    value_template: '{% set last_triggered = state_attr(''automation.air_the_living_room'',
+      ''last_triggered'') %}
+
+      {{ last_triggered and (now() - last_triggered).total_seconds() < 3600}}'
   action:
-  - device_id: 6b65c175185bbcc197739de0d6ff6e91
+  - device_id: b16bb5e419a81d90d9ae90b7e2ebd39c
     domain: mobile_app
     type: notify
     message: Todo OK!
+  mode: single
+- id: '1739305187532'
+  alias: Noah Turn AC on
+  description: ''
+  trigger:
+  - platform: time
+    at: '21:00:00'
+  condition: []
+  action:
+  - action: climate.turn_on
+    target:
+      device_id:
+      - 531ce6df61ec99656e88f0c9f1dcd3f4
+    data: {}
+  - action: climate.set_temperature
+    metadata: {}
+    data:
+      temperature: 20
+      hvac_mode: heat_cool
+    target:
+      device_id: 531ce6df61ec99656e88f0c9f1dcd3f4
+  mode: single
+- id: '1748806007259'
+  alias: Apagar AC en las habitaciones
+  description: ''
+  triggers:
+  - at: 06:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - action: climate.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 531ce6df61ec99656e88f0c9f1dcd3f4
+  - action: climate.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 86b1fe6103c1d673d4135eb2eddee1b6
   mode: single
