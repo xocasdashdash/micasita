@@ -2,7 +2,7 @@ services:
   homeassistant_db:
     networks: [main]
     container_name: postgres
-    image: postgres:latest@sha256:4ec37d2a07a0067f176fdcc9d4bb633a5724d2cc4f892c7a2046d054bb6939e5
+    image: postgres:latest@sha256:19ad070ea172efd48d7cae52297caaf845a3625728674bbc1a6efb679ab7befe
     environment:
       POSTGRES_USER: postgresql
       POSTGRES_HOST_AUTH_METHOD: trust
