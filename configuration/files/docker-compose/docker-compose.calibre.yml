@@ -2,7 +2,7 @@ services:
   readarr:
     networks:
       - main
-    image: lscr.io/linuxserver/readarr:develop@sha256:0cd1d5073121cc9c3edd208e705b70b438f423f012645dc8b2a7fc9d066f4700
+    image: lscr.io/linuxserver/readarr:develop@sha256:eb37f58646a901dc7727cf448cae36daaefaba79de33b5058dab79aa4c04aefb
     container_name: readarr
     labels:
       - "traefik.enable=true"
