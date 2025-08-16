@@ -5,9 +5,25 @@ default_config:
 # Text to speech
 tts:
   - platform: google_translate
+# Database
+recorder:
+  db_url: !secret psql_connector_string
+  db_retry_wait: 10 # Wait 10 seconds before retrying
+  exclude:
+    domains:
+      - automation
+      - updater
+    entity_globs:
+      - sensor.weather_*
+    entities:
+      - sun.sun # Don't record sun data
+      - sensor.last_boot # Comes from 'systemmonitor' sensor platform
+      - sensor.date
+    event_types:
+      - call_service # Don't record service calls
+
 
 automation: !include automations.yaml
-script: !include scripts.yaml
 scene: !include scenes.yaml
 # recorder:
 #   db_url: postgresql://postgresql:@homeassistant_db:5432/ha

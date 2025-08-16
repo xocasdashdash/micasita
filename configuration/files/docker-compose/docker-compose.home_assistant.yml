@@ -26,6 +26,9 @@ services:
       - "traefik.http.routers.home_assistant.entrypoints=websecure"
       - "traefik.http.routers.home_assistant.tls.certresolver=letsencrypt"
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
+    depends_on:
+      homeassistant_db_init:
+        condition: service_started
   mdns-repeater:
     image: docker.io/angelnu/mdns_repeater@sha256:2255ce3e36c75fb6180850510d035db5f51142890b2e3e3ccc14d19b484fe750
     restart: unless-stopped
