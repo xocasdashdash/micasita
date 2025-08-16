@@ -26,7 +26,7 @@ recorder:
 automation: !include automations.yaml
 scene: !include scenes.yaml
 # recorder:
-#   db_url: postgresql://postgresql:@homeassistant_db:5432/ha
+#   db_url: postgresql://postgresql:@postgres_db:5432/ha
 sensor:
   - platform: mqtt_room
     device_id: "iBeacon:c737f23e-5c40-437e-b783-4e7ca40ad2e7_100_1"

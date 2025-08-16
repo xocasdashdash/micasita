@@ -1,6 +1,7 @@
 include:
   - docker-compose.actual.yml
   - docker-compose.calibre.yml
+  - docker-compose.postgres.yml
   - docker-compose.home_assistant.yml
   - docker-compose.home_assistant_db.yml
   - docker-compose.mqtt.yml

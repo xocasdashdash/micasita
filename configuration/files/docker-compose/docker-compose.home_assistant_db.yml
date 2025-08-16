@@ -1,39 +1,5 @@
 services:
-  homeassistant_db:
-    networks: [main]
-    container_name: postgres
-    image: postgres:latest@sha256:29e0bb09c8e7e7fc265ea9f4367de9622e55bae6b0b97e7cce740c2d63c2ebc0
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_PASSWORD: "this-is-a-very-secure-password"
-      POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - "{{ base_directory }}/postgresql-data:/var/lib/postgresql/data"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgresql"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  # This fails after the first run (role exists), doing it this way to avoid
-  # having to share any volumes with the main postgres container.
-  # Leave it here mostly as documentation.
-  homeassistant_db_init:
-    depends_on:
-      homeassistant_db:
-        condition: service_healthy
-    networks: [main]
-    image: postgres:latest@sha256:29e0bb09c8e7e7fc265ea9f4367de9622e55bae6b0b97e7cce740c2d63c2ebc0
-    entrypoint: >
-      sh -c "psql -c \"CREATE USER homeassistant WITH PASSWORD 'this-is-ha';\" &&
-      psql -c \"CREATE DATABASE homeassistant_db WITH OWNER homeassistant ENCODING 'utf8' TEMPLATE template0;\""
-    environment:
-      - PGUSER=postgres
-      - PGPASSWORD=this-is-a-very-secure-password
-      - PGDATABASE=postgres
-      - PGHOST=homeassistant_db
+
 networks:
   main:
     external: true
