@@ -2,7 +2,7 @@
 services:
   tailscale:
     container_name: tailscale
-    image: tailscale/tailscale
+    image: ghcr.io/tailscale/tailscale:latest
     restart: always
     networks:
       - main

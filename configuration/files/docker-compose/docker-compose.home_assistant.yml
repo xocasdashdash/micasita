@@ -1,17 +1,4 @@
 services:
-  homeassistant_db:
-    networks: [main]
-    container_name: postgres
-    image: postgres:latest@sha256:4ec37d2a07a0067f176fdcc9d4bb633a5724d2cc4f892c7a2046d054bb6939e5
-    environment:
-      POSTGRES_USER: postgresql
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_PASSWORD: "this-is-a-very-secure-password"
-      POSTGRES_DB: ha
-    ports:
-      - "5432:5432"
-    volumes:
-      - "{{ base_directory }}/postgresql-data:/var/lib/postgresql/data"
   homeassistant:
     networks: [main]
     container_name: homeassistant
@@ -39,32 +26,6 @@ services:
       - "traefik.http.routers.home_assistant.entrypoints=websecure"
       - "traefik.http.routers.home_assistant.tls.certresolver=letsencrypt"
       - "traefik.http.services.home_assistant.loadbalancer.server.port=8123"
-  mqtt:
-    networks: [main]
-    image: docker.io/vernemq/vernemq:latest@sha256:ad389cb177e589d91f1fa79ea1abbb900f860e464b95421465c0231f78624266
-    restart: unless-stopped
-    ports:
-      - "8888:8888"
-      - "9001:9001"
-    environment:
-      DOCKER_VERNEMQ_ACCEPT_EULA: "yes"
-      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
-      DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD: "off"
-      DOCKER_VERNEMQ_LOG__CONSOLE: "console"
-      DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL: "warning"
-      DOCKER_VERNEMQ_LOG__CRASH: "on"
-      DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: "3,4,5"
-    volumes:
-      - "{{ base_directory }}/mqtt/data:/vernemq/data"
-      - "{{ base_directory }}/mqtt/log:/vernemq/log"
-      - "{{ base_directory }}/mqtt/vmq.acl:/vernemq/etc/vmq.acl"
-    labels:
-      - "traefik.enable=true"
-      ## TCP Routers/Service
-      - "traefik.tcp.routers.mqtt-tcp.entrypoints=mqtt"
-      - "traefik.tcp.routers.mqtt-tcp.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.mqtt-tcp.service=mqtt-tcp"
-      - "traefik.tcp.services.mqtt-tcp.loadbalancer.server.port=1883"
   mdns-repeater:
     image: docker.io/angelnu/mdns_repeater@sha256:2255ce3e36c75fb6180850510d035db5f51142890b2e3e3ccc14d19b484fe750
     restart: unless-stopped

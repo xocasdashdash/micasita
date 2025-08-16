@@ -1,7 +1,7 @@
 services:
   ts-jellyfin:
     networks: [main]
-    image: tailscale/tailscale:latest
+    image: ghcr.io/tailscale/tailscale:latest
     hostname: ts-jellyfin
     environment:
       - TS_AUTHKEY={{ secret.tailscale.oauth.jellyfin.secret }}

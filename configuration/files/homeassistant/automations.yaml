@@ -188,3 +188,43 @@
     target:
       device_id: 86b1fe6103c1d673d4135eb2eddee1b6
   mode: single
+- id: '1748806007260'
+  alias: Apagar AC en la oficina
+  description: ''
+  triggers:
+  - at: 00:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - action: climate.turn_off
+    metadata: {}
+    data: {}
+    target:
+      device_id: 86b1fe6103c1d673d4135eb2eddee1b6
+  mode: single
+- id: '1751348403926'
+  alias: Noah turn on mosquitos
+  description: ''
+  triggers:
+  - trigger: time
+    at: '20:00:00'
+  conditions: []
+  actions:
+  - type: turn_on
+    device_id: a2fe29bb5176b751aba423504aaee972
+    entity_id: 0def4999ce32e87e8fdf2d84cb34a078
+    domain: switch
+  mode: single
+- id: '1751348436280'
+  alias: Noah Turn off mosquitos
+  description: ''
+  triggers:
+  - trigger: time
+    at: 06:00:00
+  conditions: []
+  actions:
+  - type: turn_off
+    device_id: a2fe29bb5176b751aba423504aaee972
+    entity_id: 0def4999ce32e87e8fdf2d84cb34a078
+    domain: switch
+  mode: single

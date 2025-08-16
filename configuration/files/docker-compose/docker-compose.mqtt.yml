@@ -1,0 +1,33 @@
+services:
+  mqtt:
+    networks: [main]
+    image: docker.io/vernemq/vernemq:latest@sha256:ad389cb177e589d91f1fa79ea1abbb900f860e464b95421465c0231f78624266
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+      - "9001:9001"
+    environment:
+      DOCKER_VERNEMQ_ACCEPT_EULA: "yes"
+      DOCKER_VERNEMQ_ALLOW_ANONYMOUS: "on"
+      DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD: "off"
+      DOCKER_VERNEMQ_LOG__CONSOLE: "console"
+      DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL: "warning"
+      DOCKER_VERNEMQ_LOG__CRASH: "on"
+      DOCKER_VERNEMQ_LISTENER__TCP__ALLOWED_PROTOCOL_VERSIONS: "3,4,5"
+    volumes:
+      - "{{ base_directory }}/mqtt/data:/vernemq/data"
+      - "{{ base_directory }}/mqtt/log:/vernemq/log"
+      - "{{ base_directory }}/mqtt/vmq.acl:/vernemq/etc/vmq.acl"
+    labels:
+      - "traefik.enable=true"
+      ## TCP Routers/Service
+      - "traefik.tcp.routers.mqtt-tcp.entrypoints=mqtt"
+      - "traefik.tcp.routers.mqtt-tcp.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mqtt-tcp.service=mqtt-tcp"
+      - "traefik.tcp.services.mqtt-tcp.loadbalancer.server.port=1883"
+
+networks:
+  main:
+    external: true
+  wgnet:
+    external: true

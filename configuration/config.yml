@@ -435,8 +435,9 @@
       register: compose_files
     - name: "Fire up docker-compose"
       community.docker.docker_compose_v2:
-        project_src: "{{ base_directory }}"
-        files: "{{ compose_files.results | map(attribute='dest') }}"
+        project_src: "{{ base_directory }}/docker-compose"
+        project_name: "cerebrito"
+        files: "docker-compose.yml"
         pull: "always"
         state: "present"
         recreate: "always"
