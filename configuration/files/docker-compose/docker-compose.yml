@@ -3,7 +3,6 @@ include:
   - docker-compose.calibre.yml
   - docker-compose.postgres.yml
   - docker-compose.home_assistant.yml
-  - docker-compose.home_assistant_db.yml
   - docker-compose.mqtt.yml
   - docker-compose.download-clients.yml
   - docker-compose.jellyfin.yml
@@ -11,3 +10,4 @@ include:
   - docker-compose.tailscale.yml
   - docker-compose.traefik.yml
   - docker-compose.wireguard.yml
+  - docker-compose.zigbee.yml

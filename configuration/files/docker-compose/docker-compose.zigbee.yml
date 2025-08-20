@@ -1,0 +1,28 @@
+services:
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt:latest@sha256:472f4f5ed5d4258056093ea5745bc0ada37628b667d7db4fb12c2ffea74b2703
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zigbee2mqtt.rule=HostRegexp(`zigbee2mqtt.{any:.+}`)"
+      - "traefik.http.routers.zigbee2mqtt.entrypoints=websecure"
+      - "traefik.http.routers.zigbee2mqtt.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zigbee2mqtt.loadbalancer.server.port=8080"
+    volumes:
+      - "{{ base_directory }}/zigbee2mqtt-data:/app/data"
+      - /run/udev:/run/udev:ro
+    user: 1000:1000
+    group_add:
+      - dialout
+    devices:
+      - {{ secret.zigbee_device_id }}:/dev/ttyUSB0
+    environment:
+      - TZ=Europe/Amsterdam
+    networks:
+      - main
+
+
+networks:
+  main:
+    external: true

@@ -1,7 +1,0 @@
-services:
-
-networks:
-  main:
-    external: true
-  wgnet:
-    external: true

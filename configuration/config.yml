@@ -205,6 +205,22 @@
         - "/data/tv"
         - "/media/data/downloads"
         - "/media/data/incomplete-downloads"
+
+- hosts: cerebrito
+  tags:
+    - zigbee2mqtt
+    - services
+  become: true
+  tasks:
+    - name: Create configuration directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/zigbee2mqtt-data"
 - hosts: cerebrito
   tags:
     - sabnzbd
