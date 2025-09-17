@@ -1,7 +1,7 @@
 services:
   mqtt:
     networks: [main]
-    image: docker.io/vernemq/vernemq:latest@sha256:ad389cb177e589d91f1fa79ea1abbb900f860e464b95421465c0231f78624266
+    image: docker.io/vernemq/vernemq:latest@sha256:4f09b3ee2927866ce365d9aa15263f17e192c776f608a2198db5f12c501d2928
     restart: unless-stopped
     ports:
       - "8888:8888"
