@@ -7,7 +7,7 @@ services:
       postgres_db:
         condition: service_healthy
     networks: [main]
-    image: postgres:latest@sha256:29e0bb09c8e7e7fc265ea9f4367de9622e55bae6b0b97e7cce740c2d63c2ebc0
+    image: postgres:latest@sha256:073e7c8b84e2197f94c8083634640ab37105effe1bc853ca4d5fbece3219b0e8
     entrypoint: >
       sh -c "psql -c \"CREATE USER homeassistant WITH PASSWORD 'this-is-ha';\" &&
       psql -c \"CREATE DATABASE homeassistant_db WITH OWNER homeassistant ENCODING 'utf8' TEMPLATE template0;\""
