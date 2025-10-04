@@ -19,7 +19,7 @@ services:
   homeassistant:
     networks: [main]
     container_name: homeassistant
-    image: ghcr.io/home-assistant/home-assistant:stable@sha256:dda88779889b09d5465b8bf0c69ba2a62f81b01ee74d943ebe31e3474ea7cbea
+    image: ghcr.io/home-assistant/home-assistant:stable@sha256:9255033272ab8f7bede246109ea9e7302527faf3accbf2ba7ef619e2206107ad
     volumes:
       - "{{ base_directory }}/homeassistant/config/:/config/"
       - /etc/localtime:/etc/localtime:ro
