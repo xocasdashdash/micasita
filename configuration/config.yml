@@ -405,6 +405,21 @@
 
 - hosts: cerebrito
   tags:
+    - immich
+    - services
+  tasks:
+    - name: Create configuration directories for immich
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: "directory"
+        mode: "u=rwx,g=rx,o=rx"
+        owner: "{{ server_user }}"
+        group: "{{ server_user }}"
+      with_items:
+        - "{{ base_directory }}/immich"
+        - "{{ base_directory }}/immich/data"
+- hosts: cerebrito
+  tags:
     - docker-compose
     - services
   tasks:

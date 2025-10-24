@@ -2,7 +2,7 @@ services:
   postgres_db:
     networks: [main]
     container_name: postgres
-    image: postgres:latest@sha256:29e0bb09c8e7e7fc265ea9f4367de9622e55bae6b0b97e7cce740c2d63c2ebc0
+    image: pgvector/pgvector:pg17-trixie@sha256:602e2bfa1ac026aedfd34bcef2154c8112b98d709bd692cba28f40a0c7ba809e
     environment:
       POSTGRES_USER: postgres
       POSTGRES_HOST_AUTH_METHOD: trust

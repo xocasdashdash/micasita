@@ -5,6 +5,7 @@ include:
   - docker-compose.home_assistant.yml
   - docker-compose.mqtt.yml
   - docker-compose.download-clients.yml
+  - docker-compose.immich.yml
   - docker-compose.jellyfin.yml
   - docker-compose.servarr.yml
   - docker-compose.tailscale.yml
