@@ -1,0 +1,82 @@
+services:
+  immich_db_init:
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    networks: [main]
+    image: postgres:latest@sha256:29e0bb09c8e7e7fc265ea9f4367de9622e55bae6b0b97e7cce740c2d63c2ebc0
+    entrypoint: >
+      sh -c "psql -c \"CREATE USER immich WITH PASSWORD 'this-is-ha';\" &&
+      psql -c \"CREATE DATABASE immich_db WITH OWNER immich ENCODING 'utf8' TEMPLATE template0;\""
+    environment:
+      - PGUSER=postgres
+      - PGPASSWORD=this-is-a-very-secure-password
+      - PGDATABASE=postgres
+      - PGHOST=postgres_db
+  immich-server:
+    depends_on:
+      immich_db_init:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks: [main]
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
+    environment:
+      DB_HOSTNAME: postgres_db
+      DB_PORT: 5432
+      DB_USER: immich
+      DB_PASSWORD: this-is-ha
+      DB_DATABASE_NAME: immich_db
+      REDIS_HOSTNAME: redis
+      REDIS_PORT: 6379
+    # extends:
+    #   file: hwaccel.transcoding.yml
+    #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
+    volumes:
+      # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
+      - "{{ base_directory }}/immich/data:/data"
+      - /etc/localtime:/etc/localtime:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.immich.rule=HostRegexp(`photos.{any:.+}`)"
+      - "traefik.http.routers.immich.entrypoints=websecure"
+      - "traefik.http.routers.immich.tls=true"
+      - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
+      - "traefik.http.services.immich.loadbalancer.server.port=2283"
+    ports:
+      - '2283:2283'
+    restart: always
+    healthcheck:
+      disable: false
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    # For hardware acceleration, add one of -[armnn, cuda, rocm, openvino, rknn] to the image tag.
+    # Example tag: ${IMMICH_VERSION:-release}-cuda
+    image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
+    # extends: # uncomment this section for hardware acceleration - see https://docs.immich.app/features/ml-hardware-acceleration
+    #   file: hwaccel.ml.yml
+    #   service: cpu # set to one of [armnn, cuda, rocm, openvino, openvino-wsl, rknn] for accelerated inference - use the `-wsl` version for WSL2 where applicable
+    volumes:
+      - model-cache:/cache
+    restart: always
+    networks: [main]
+    healthcheck:
+      disable: false
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey:8-bookworm@sha256:fea8b3e67b15729d4bb70589eb03367bab9ad1ee89c876f54327fc7c6e618571
+    healthcheck:
+      test: redis-cli ping || exit 1
+    networks: [main]
+    restart: always
+volumes:
+  model-cache:
+    driver: local
+networks:
+  main:
+    external: true
+  wgnet:
+    external: true
