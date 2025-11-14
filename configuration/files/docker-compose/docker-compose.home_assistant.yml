@@ -55,7 +55,7 @@ services:
     network_mode: host
   nodered:
     restart: unless-stopped
-    image: docker.io/nodered/node-red:3.0.2-16@sha256:524316b9b84cb5bbfe006c117f3dad31ee806804b12e4b866047a65e2080e92d
+    image: docker.io/nodered/node-red:3.1.15-16@sha256:8a5d17ce1ac6e1d8a3cfd0ea1948eb69593e59be064c3d5f5ed9b915c75e6363
     environment:
       TZ: UTC
     networks: [main]
