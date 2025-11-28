@@ -70,7 +70,7 @@ services:
   pihole:
     container_name: pihole
     hostname: pihole
-    image: docker.io/pihole/pihole:latest@sha256:9da1360c747715c41cf327580d2cc064f04776674afe317abd99cac70cd65e82
+    image: docker.io/pihole/pihole:latest@sha256:91dc91ddd413bf461c283204558f8f21839851e9824799075a7ceff7c77eea40
     networks: [main]
     ports:
       - '8053:80/tcp'
