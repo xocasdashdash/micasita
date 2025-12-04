@@ -2,7 +2,7 @@ services:
   actual_server:
     networks: [main]
     container_name: actual
-    image: docker.io/actualbudget/actual-server@sha256:58fecd9088b73ffe402450f51eff488036cdc8ca570650be38ad2bbabbfe193b
+    image: docker.io/actualbudget/actual-server@sha256:7f38b450cc3b7523dd5377792895e58b9cf333769e5a27f89e643b6f5fc60565
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.actual.rule=HostRegexp(`actual.{any:.+}`)"
